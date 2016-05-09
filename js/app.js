@@ -8,7 +8,7 @@ var ViewModel = function() {
   
   this.photoList = ko.observableArray([]);
 
-  $.getJSON("/photo_api/json/IMG_7870.json", function(data) {
+  $.getJSON("/photo_api/json/all.json", function(data) {
     data.forEach(function(photoData) {
       self.photoList.push(new Photo(photoData));
     });
