@@ -3,6 +3,7 @@ var Photo = function(data) {
   this.fileName = ko.observable(data.FileName);
   console.log(data.thumbnailImage);
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
+  this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
 }
 
 var ViewModel = function() {
@@ -15,23 +16,13 @@ var ViewModel = function() {
       self.photoList.push(new Photo(photoData));
     });
   });
-  /*
-  this.catList = ko.observableArray([]);
   
-  initialCats.forEach(function(catItem) {
-    self.catList.push(new Cat(catItem));
-  });
-
-  this.currentCat = ko.observable( this.catList()[0] );
-
-  this.incrementCounter = function() {
-    self.currentCat().clickCount(self.currentCat().clickCount() + 1);
-  };
+  this.viewingPhoto = ko.observable();
   
-  this.changeCat = function(newCat) {
-    self.currentCat(newCat);
-  };
-*/
+  this.viewPhoto = function(whichPhoto) {
+    self.viewingPhoto(whichPhoto);
+  }
+
 };
 
 ko.applyBindings(new ViewModel());

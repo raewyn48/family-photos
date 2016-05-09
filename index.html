@@ -7,7 +7,11 @@
 <body>
 
   <div data-bind="foreach: photoList">
-    <img data-bind="attr: {src: thumbnailImage, alt: fileName}" src="" alt="">
+    <img data-bind="click: $parent.viewPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="">
+  </div>
+  
+  <div data-bind="with: viewingPhoto">
+    <img data-bind="attr: {src: photoURL}" src="" alt="">
   </div>
   
 
