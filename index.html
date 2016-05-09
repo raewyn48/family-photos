@@ -6,10 +6,10 @@
 </head>
 <body>
 
-  <ul data-bind="foreach: photoList">
-    <li data-bind="text: fileName">
-  </ul>
-
+  <div data-bind="foreach: photoList">
+    <img data-bind="attr: {src: thumbnailImage, alt: fileName}" src="" alt="">
+  </div>
+  
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
     <script src="js/lib/knockout-3.4.0.js"></script>

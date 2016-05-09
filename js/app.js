@@ -1,6 +1,8 @@
 var Photo = function(data) {
   
   this.fileName = ko.observable(data.FileName);
+  console.log(data.thumbnailImage);
+  this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
 }
 
 var ViewModel = function() {
