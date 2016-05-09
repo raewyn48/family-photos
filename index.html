@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Family Photos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+   <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
 
-  <div data-bind="foreach: photoList">
+  <div class="thumbnails" data-bind="foreach: photoList">
     <img data-bind="click: $parent.viewPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="">
   </div>
   
-  <div data-bind="with: viewingPhoto">
+  <div class="photo-viewer" data-bind="with: viewingPhoto">
     <img data-bind="attr: {src: photoURL}" src="" alt="">
   </div>
   
