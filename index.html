@@ -16,23 +16,16 @@
   
   <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
       <span data-bind="click: $root.deselectPhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
-    <div id="photo-view" class="w3-modal-content w3-animate-zoom">
-      <div id="photo-frame" data-bind="with: selectedPhoto">
-        <img data-bind="attr: {src: photoURL}" src="" alt="" class="" style="height: 85vh">
-      </div>
-      <div id="metadata" class="w3-rest" style="display:none">
-        <form class="form-horizontal" role="form">
-          <div class="form-group">
+    <div id="photo-view" data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row">
+    <div class="w3-col" id="photo-frame">
+      <img data-bind="attr: {src: photoURL}" src="" alt="" class="w3-margin-right">
+    </div>
+      <div id="metadata" class="w3-rest">
             <label class="" for="title">Title</label>
-            <input type="text" class="w3-input w3-border" data-bind="title">
-          </div>
-          <div class="form-group">
+            <input type="text" class="w3-input" data-bind="title">
             <label class="" for="description">Description</label>
-            <input class="w3-input w3-border" type="text" data-bind="description">
-            <button class="w3-btn w3-light-grey w3-border w3-round">Save</button>
-          </div>
-
-        </form>
+            <input class="" type="text" data-bind="description">
+            <button class="">Save</button>
       </div>
     </div>
   </div>
