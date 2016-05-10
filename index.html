@@ -4,19 +4,40 @@
     <meta charset="UTF-8">
     <title>Family Photos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
    <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
 
+<div class="w3-container">
   <div class="thumbnails" data-bind="foreach: photoList">
-    <img data-bind="click: $parent.viewPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="">
+    <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="" class="img-thumbnail">
   </div>
   
-  <div class="photo-viewer" data-bind="with: viewingPhoto">
-    <img data-bind="attr: {src: photoURL}" src="" alt="">
+  <div data-bind="visible: photoSelected()" class="w3-row w3-border w3-padding">
+    <div id="photo-frame" data-bind="with: selectedPhoto" class="w3-twothird">
+      <img data-bind="attr: {src: photoURL}" src="" alt="" class="img-responsive">
+    </div>
+    <div id="metadata" class="w3-third">
+      <form class="form-horizontal" role="form">
+        <div class="form-group">
+          <label class="" for="title">Title</label>
+          <div class="col-sm-4">
+            <input type="text" class="w3-input w3-border" data-bind="title">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="" for="description">Description</label>
+          <div class="col-sm-4">
+            <input class="w3-input w3-border" type="text" data-bind="description">
+          </div>
+        </div>
+
+      </form>
+    </div>
   </div>
   
+</div><!--// w3-container -->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
     <script src="js/lib/knockout-3.4.0.js"></script>
