@@ -2,8 +2,8 @@ var Photo = function(data) {
   
   this.fileName = ko.observable(data.FileName);
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
-  this.title = ko.observable(data.Title);
-  this.description = ko.observable(data.Description)
+  this.metaTitle = ko.observable(data.Title);
+  this.metaDescription = ko.observable(data.Description)
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
 }
 
@@ -18,7 +18,7 @@ var ViewModel = function() {
     });
   });
   
-  this.selectedPhoto = ko.observable(this.photoList()[0]);
+  this.selectedPhoto = ko.observable();
   
   this.selectPhoto = function(whichPhoto) {
     self.selectedPhoto(whichPhoto);

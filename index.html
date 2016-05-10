@@ -21,10 +21,12 @@
       <img data-bind="attr: {src: photoURL}" src="" alt="" class="w3-margin-right">
     </div>
       <div id="metadata" class="w3-rest">
+            <input data-bind="value: fileName" type="text" class="w3-input">
+            <label class="" for="title">File Name</label>
+            <input data-bind="value: metaTitle" type="text" class="w3-input">
             <label class="" for="title">Title</label>
-            <input data-bind="title" type="text" class="w3-input">
+            <input type="text" data-bind="value: metaDescription" class="w3-input">
             <label class="" for="description">Description</label>
-            <input type="text" data-bind="description" class="w3-input">
             <button class="w3-btn w3-dk-grey">Save</button>
       </div>
     </div>
