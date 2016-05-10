@@ -18,10 +18,14 @@ var ViewModel = function() {
     });
   });
   
-  this.selectedPhoto = ko.observable();
+  this.selectedPhoto = ko.observable(this.photoList()[0]);
   
   this.selectPhoto = function(whichPhoto) {
     self.selectedPhoto(whichPhoto);
+  }
+
+  this.deselectPhoto = function() {
+    self.selectedPhoto(null);
   }
   
   this.photoSelected = function() {
