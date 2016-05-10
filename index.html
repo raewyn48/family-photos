@@ -11,29 +11,28 @@
 
 <div class="w3-container">
   <div class="thumbnails" data-bind="foreach: photoList">
-    <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="" class="img-thumbnail">
+    <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="" class="w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity">
   </div>
   
-  <div data-bind="visible: photoSelected()" class="w3-row w3-border w3-padding">
-    <div id="photo-frame" data-bind="with: selectedPhoto" class="w3-twothird">
-      <img data-bind="attr: {src: photoURL}" src="" alt="" class="img-responsive">
-    </div>
-    <div id="metadata" class="w3-third">
-      <form class="form-horizontal" role="form">
-        <div class="form-group">
-          <label class="" for="title">Title</label>
-          <div class="col-sm-4">
+  <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
+    <div class="w3-modal-content w3-row w3-padding">
+      <div id="photo-frame" data-bind="with: selectedPhoto" class="w3-twothird w3-center">
+        <img data-bind="attr: {src: photoURL}" src="" alt="" class="">
+      </div>
+      <div id="metadata" class="w3-rest">
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label class="" for="title">Title</label>
             <input type="text" class="w3-input w3-border" data-bind="title">
           </div>
-        </div>
-        <div class="form-group">
-          <label class="" for="description">Description</label>
-          <div class="col-sm-4">
+          <div class="form-group">
+            <label class="" for="description">Description</label>
             <input class="w3-input w3-border" type="text" data-bind="description">
+            <button class="w3-btn w3-light-grey w3-border w3-round">Save</button>
           </div>
-        </div>
 
-      </form>
+        </form>
+      </div>
     </div>
   </div>
   
