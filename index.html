@@ -15,8 +15,8 @@
   </div>
   
   <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
-      <span data-bind="click: $root.deselectPhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
     <div id="photo-view" data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row">
+      <span data-bind="click: $root.deselectPhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
     <div class="w3-col" id="photo-frame">
       <img data-bind="attr: {src: photoURL}" src="" alt="" class="w3-margin-right">
     </div>
