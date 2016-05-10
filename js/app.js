@@ -1,10 +1,16 @@
+var EditableFields = function(data) {
+  this.SourceFile = ko.observable(data.SourceFile);
+  this.FileName = ko.observable(data.FileName);
+  this.Title = ko.observable(data.Title);
+  this.Description = ko.observable(data.Description);
+};
+
 var Photo = function(data) {
-  
-  this.fileName = ko.observable(data.FileName);
+  self = this;
+  this.editables = new EditableFields(data);
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
-  this.metaTitle = ko.observable(data.Title);
-  this.metaDescription = ko.observable(data.Description)
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
+  
 }
 
 var ViewModel = function() {
@@ -30,6 +36,16 @@ var ViewModel = function() {
   
   this.photoSelected = function() {
     return self.selectedPhoto();
+  }
+  
+  this.saveField = function(data, event) {
+  }
+  
+  this.savePhoto = function() {
+    var data = ko.toJSON(self.selectedPhoto().editables);
+    $.post("/photo_api/update.php", {json: data}, function(returnedData) {
+      console.log(returnedData);
+    });
   }
 
 };

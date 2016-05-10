@@ -11,7 +11,7 @@
 
 <div class="w3-container">
   <div class="thumbnails" data-bind="foreach: photoList">
-    <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage, alt: fileName}" src="" alt="" class="w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity">
+    <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage }" src="" alt="" class="w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity">
   </div>
   
   <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
@@ -23,17 +23,17 @@
       <div id="metadata" class="w3-rest">
         <p>
             <label for="title" class="w3-label">File Name</label>
-            <input data-bind="value: fileName" type="text" class="w3-input">
+            <input data-bind="textInput: editables.FileName" type="text" class="w3-input">
         </p>
         <p>
             <label for="title" class="w3-label">Title</label>
-            <input data-bind="value: metaTitle" type="text" class="w3-input">
+            <input data-bind="value: editables.Title" type="text" class="w3-input">
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea type="text" data-bind="value: metaDescription" class="w3-input"></textarea>
+            <textarea type="text" data-bind="textInput: editables.Description" class="w3-input"></textarea>
         </p>
-            <button class="w3-btn w3-dk-grey">Save</button>
+            <button data-bind="click: $parent.savePhoto" class="w3-btn w3-dk-grey">Save</button>
       </div>
     </div>
   </div>
