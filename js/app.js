@@ -3,6 +3,7 @@ var EditableFields = function(data) {
   this.FileName = ko.observable(data.FileName);
   this.Title = ko.observable(data.Title);
   this.Description = ko.observable(data.Description);
+  this.Keywords = ko.observableArray([].concat(data.Keywords)); // Make sure it's an array
 };
 
 var Photo = function(data) {
@@ -10,7 +11,12 @@ var Photo = function(data) {
   this.editables = new EditableFields(data);
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
+  this.enteredKeyword = ko.observable();
   
+  this.saveKeyword = function() {
+    self.editables.Keywords.push(self.enteredKeyword);
+    self.enteredKeyword('');
+  };
 }
 
 var ViewModel = function() {
@@ -27,6 +33,7 @@ var ViewModel = function() {
   this.selectedPhoto = ko.observable();
   
   this.selectPhoto = function(whichPhoto) {
+    console.log(ko.toJS(whichPhoto));
     self.selectedPhoto(whichPhoto);
   }
 

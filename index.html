@@ -23,18 +23,25 @@
     <div class="w3-col" id="photo-frame">
       <img data-bind="attr: {src: photoURL}" src="" alt="" class="w3-margin-right">
     </div>
-      <div id="metadata" class="w3-rest">
+      <div id="metadata" class="w3-rest" data-bind="with: editables">
         <p>
-            <label for="title" class="w3-label">File Name</label>
-            <input data-bind="textInput: editables.FileName" type="text" class="w3-input">
+            <label for="filename" class="w3-label">File Name</label>
+            <input id="fielname" data-bind="textInput: FileName" type="text" class="w3-input">
         </p>
         <p>
             <label for="title" class="w3-label">Title</label>
-            <input data-bind="value: editables.Title" type="text" class="w3-input">
+            <input id="title" data-bind="value: Title" type="text" class="w3-input">
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea type="text" data-bind="textInput: editables.Description" class="w3-input"></textarea>
+            <textarea id="description" type="text" data-bind="textInput: Description" class="w3-input"></textarea>
+        </p>
+        <p>
+            <label for="keywords" class="w3-label">Keywords</label>
+            <input id="keywords" data-bind="value: enteredKeyword" type="text" class="w3-input">
+            <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
+              <span data-bind="text: $data" class="w3-tag w3-teal w3-padding-small w3-round">
+            </div>	
         </p>
             <button data-bind="click: $parent.savePhoto" class="w3-btn w3-dk-grey">Save</button>
       </div>
