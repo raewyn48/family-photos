@@ -5,7 +5,7 @@ var Photo = function(data) {
     FileName: ko.observable(data.FileName),
     Title: ko.observable(data.Title),
     Description: ko.observable(data.Description),
-    Keywords: ko.observableArray([].concat(data.Keywords)) // Make sure it's an array
+    Keywords:  ko.observableArray(data.Keywords ? [].concat(data.Keywords) : []) // Make sure it's an array
   }
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
@@ -44,9 +44,11 @@ var ViewModel = function() {
   
   this.savePhoto = function() {
     var data = ko.toJSON(self.selectedPhoto().editables);
+    console.log(data);
     $.post("/photo_api/update.php", {json: data}, function(returnedData) {
       console.log(returnedData);
     });
+    self.selectedPhoto(null);
   }
   
   this.onEnter = function(d,e) {
