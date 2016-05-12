@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
    <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body>
+<body data-bind="css: { saving: appStatus() == 'saving' } " class="">
 
 <div class="w3-container">
   <div class="thumbnails" data-bind="foreach: photoList">
-    <div class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity">
+    <div class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity w3-show-inline-block">
       <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage }" src="" alt="" class="">
       <div data-bind="text: editables.FileName" class="w3-small w3-center"></div>
     </div>
@@ -40,7 +40,7 @@
             <label for="keywords" class="w3-label">Keywords</label>
             <input id="keywords" data-bind="textInput: $parent.enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input">
             <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
-              <span data-bind="text: $data" class="w3-tag w3-teal w3-padding-small w3-round">
+              <span data-bind="text: $data" class="keyword w3-tag w3-teal w3-padding-small w3-round w3-hover-red">
             </div>	
         </p>
             <button data-bind="click: $root.savePhoto" class="w3-btn w3-dk-grey">Save</button>

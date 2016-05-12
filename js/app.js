@@ -17,6 +17,7 @@ var ViewModel = function() {
   var self = this;
    
   this.photoList = ko.observableArray([]);
+  this.appStatus = ko.observable('');
 
   $.getJSON("/photo_api/json/all.json", function(data) {
     data.forEach(function(photoData) {
@@ -43,12 +44,14 @@ var ViewModel = function() {
   }
   
   this.savePhoto = function() {
+    self.appStatus('saving');
     var data = ko.toJSON(self.selectedPhoto().editables);
     console.log(data);
     $.post("/photo_api/update.php", {json: data}, function(returnedData) {
       console.log(returnedData);
+      self.selectedPhoto(null);
+      self.appStatus('');
     });
-    self.selectedPhoto(null);
   }
   
   this.onEnter = function(d,e) {

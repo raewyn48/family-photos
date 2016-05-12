@@ -14,3 +14,7 @@ div#photo-view img {
  max-height: 80vh;
  max-width: 80vw;
 }
+
+body.saving {
+  cursor: wait !important;
+}
