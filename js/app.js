@@ -1,22 +1,16 @@
-var EditableFields = function(data) {
-  this.SourceFile = ko.observable(data.SourceFile);
-  this.FileName = ko.observable(data.FileName);
-  this.Title = ko.observable(data.Title);
-  this.Description = ko.observable(data.Description);
-  this.Keywords = ko.observableArray([].concat(data.Keywords)); // Make sure it's an array
-};
-
 var Photo = function(data) {
   self = this;
-  this.editables = new EditableFields(data);
+  this.editables = {
+    SourceFile: ko.observable(data.SourceFile),
+    FileName: ko.observable(data.FileName),
+    Title: ko.observable(data.Title),
+    Description: ko.observable(data.Description),
+    Keywords: ko.observableArray([].concat(data.Keywords)) // Make sure it's an array
+  }
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
-  this.enteredKeyword = ko.observable();
-  
-  this.saveKeyword = function() {
-    self.editables.Keywords.push(self.enteredKeyword);
-    self.enteredKeyword('');
-  };
+  this.enteredKeyword = ko.observable('');
+   
 }
 
 var ViewModel = function() {
@@ -54,6 +48,16 @@ var ViewModel = function() {
       console.log(returnedData);
     });
   }
+  
+  this.onEnter = function(d,e) {
+    if (e.keyCode === 13) {
+      var newWord = self.selectedPhoto().enteredKeyword();
+      self.selectedPhoto().editables.Keywords.push(newWord);
+      self.selectedPhoto().enteredKeyword(null);
+    }
+    return true;
+  };
+
 
 };
 

@@ -38,7 +38,7 @@
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>
-            <input id="keywords" data-bind="value: enteredKeyword" type="text" class="w3-input">
+            <input id="keywords" data-bind="textInput: $parent.enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input">
             <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
               <span data-bind="text: $data" class="w3-tag w3-teal w3-padding-small w3-round">
             </div>	
@@ -52,6 +52,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
     <script src="js/lib/knockout-3.4.0.js"></script>
+    <script src="js/bindings.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
