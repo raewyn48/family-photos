@@ -19,7 +19,7 @@
   
   <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
     <div id="photo-view" data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row">
-      <span data-bind="click: $root.deselectPhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
+      <span data-bind="click: $root.closePhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
     <div class="w3-col" id="photo-frame">
       <img data-bind="attr: {src: photoURL}" src="" alt="" class="w3-margin-right">
     </div>
@@ -40,10 +40,9 @@
             <label for="keywords" class="w3-label">Keywords</label>
             <input id="keywords" data-bind="textInput: $parent.enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input">
             <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
-              <span data-bind="text: $data" class="keyword w3-tag w3-teal w3-padding-small w3-round w3-hover-red">
+              <span data-bind="text: $data, click: function() { $root.removeKeyword($index()); }" class="keyword w3-tag w3-teal w3-padding-small w3-round w3-hover-red"></span>
             </div>	
         </p>
-            <button data-bind="click: $root.savePhoto" class="w3-btn w3-dk-grey">Save</button>
       </div>
     </div>
   </div>

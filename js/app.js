@@ -32,7 +32,8 @@ var ViewModel = function() {
     self.selectedPhoto(whichPhoto);
   }
 
-  this.deselectPhoto = function() {
+  this.closePhoto = function() {
+    self.savePhoto();
     self.selectedPhoto(null);
   }
   
@@ -49,7 +50,6 @@ var ViewModel = function() {
     console.log(data);
     $.post("/photo_api/update.php", {json: data}, function(returnedData) {
       console.log(returnedData);
-      self.selectedPhoto(null);
       self.appStatus('');
     });
   }
@@ -62,6 +62,13 @@ var ViewModel = function() {
     }
     return true;
   };
+  
+  this.removeKeyword = function(i) {
+    // console.log("removing " + i);
+    // console.log(ko.toJS(self.selectedPhoto().editables.Keywords()));
+    self.selectedPhoto().editables.Keywords.splice(i,1);
+    // console.log(ko.toJS(self.selectedPhoto().editables.Keywords()));
+  }
 
 
 };

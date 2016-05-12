@@ -18,3 +18,7 @@ div#photo-view img {
 body.saving {
   cursor: wait !important;
 }
+
+span.keyword:hover {
+  cursor: pointer;
+}
