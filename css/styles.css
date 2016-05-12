@@ -22,3 +22,8 @@ body.saving {
 span.keyword:hover {
   cursor: pointer;
 }
+
+span.keyword:hover:after {
+  content ' x';
+  color: #ccc;
+}
