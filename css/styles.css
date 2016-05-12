@@ -24,6 +24,6 @@ span.keyword:hover {
 }
 
 span.keyword:hover:after {
-  content ' x';
+  content: ' x';
   color: #ccc;
 }
