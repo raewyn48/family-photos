@@ -20,27 +20,27 @@
   <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
     <div id="photo-view" data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row">
       <span data-bind="click: $root.closePhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
-    <div class="w3-col" id="photo-frame">
-      <img data-bind="attr: {src: photoURL}" src="" alt="" class="w3-margin-right">
+    <div class="w3-col m6 l7" id="photo-frame">
+      <img data-bind="attr: {src: photoURL}, css: { landscape: orientation() == 'landscape' }, css: { portrait: orientation() == 'portrait'}" src="" alt="" class="w3-margin-right">
     </div>
-      <div id="metadata" class="w3-rest" data-bind="with: editables">
+      <div id="metadata" class="w3-black w3-col m6 l5" data-bind="with: editables">
         <p>
             <label for="filename" class="w3-label">File Name</label>
-            <input id="fielname" data-bind="textInput: FileName" type="text" class="w3-input">
+            <input id="fielname" data-bind="textInput: FileName" type="text" class="w3-input w3-black">
         </p>
         <p>
             <label for="title" class="w3-label">Title</label>
-            <input id="title" data-bind="value: Title" type="text" class="w3-input">
+            <input id="title" data-bind="value: Title" type="text" class="w3-input w3-black">
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea id="description" type="text" data-bind="textInput: Description" class="w3-input"></textarea>
+            <textarea id="description" type="text" data-bind="textInput: Description" class="w3-input w3-black"></textarea>
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>
-            <input id="keywords" data-bind="textInput: $parent.enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input">
+            <input id="keywords" data-bind="textInput: $parent.enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input w3-black">
             <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
-              <span data-bind="text: $data, click: function() { $root.removeKeyword($index()); }" class="keyword w3-tag w3-teal w3-padding-small w3-round w3-hover-red"></span>
+              <span data-bind="text: $data, click: function() { $root.removeKeyword($index()); }" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round w3-hover-red"></span>
             </div>	
         </p>
       </div>

@@ -2,18 +2,35 @@ html, body {
     height: 100%;
 }
 
+div#metadata {
+    max-height: 100%;
+    overflow: auto;
+}
+
 div#photo-view {
-  width: 80%;
+  width: 90%;
+  height: 80vh;
 }
 
 div#photo-frame {
-  width: initial;
+  height: 100%
 }
 
 div#photo-view img {
- max-height: 80vh;
- max-width: 80vw;
+ width: 100%;
+ height: 100%;
 }
+
+div#photo-view img.landscape {
+ width: 100%;
+ height: auto;
+}
+
+div#photo-view img.portrait {
+ width: auto;
+ height: 100%;
+}
+
 
 body.saving {
   cursor: wait !important;

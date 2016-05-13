@@ -10,6 +10,14 @@ var Photo = function(data) {
   this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
   this.enteredKeyword = ko.observable('');
+  this.width = data.ImageWidth;
+  this.height = data.ImageHeight;
+  
+  this.orientation = ko.computed(function() {
+    console.log(this.width, this.height);
+    if (this.width > this.height) return 'landscape';
+    return 'portrait';
+  }, this);
    
 }
 
