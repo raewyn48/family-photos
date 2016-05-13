@@ -3,38 +3,30 @@ html, body {
 }
 
 div#metadata {
-    height: 100%;
     overflow: auto;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 30%;
+    height: 100%;
 }
 
 div#photo-view {
-  width: 90%;
-  height: 90vh;
-  background: none;
+  text-align: center;
+  width: 70%;
+  height: 100%;
 }
 
 div#photo-modal {
-    padding-top: 10px;
-}
-
-div#photo-frame {
-  height: 100%;
-  text-align: right;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 div#photo-view img {
  width: auto;
- height: 100%;
-}
-
-div#photo-view img.landscape {
- width: 100%;
  height: auto;
-}
-
-div#photo-view img.portrait {
- width: auto;
- height: 100%;
+ max-width: 100%;
+ max-height: 100%;
 }
 
 
