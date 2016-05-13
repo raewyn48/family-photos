@@ -13,10 +13,9 @@ var Photo = function(data) {
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
   
-  this.orientation = ko.computed(function() {
-    console.log(this.width, this.height);
-    if (this.width > this.height) return 'landscape';
-    return 'portrait';
+  this.isLandscape = ko.computed(function() {
+    if (this.width > this.height) return true;
+    else return false;
   }, this);
    
 }
@@ -36,7 +35,7 @@ var ViewModel = function() {
   this.selectedPhoto = ko.observable();
   
   this.selectPhoto = function(whichPhoto) {
-    console.log(ko.toJS(whichPhoto));
+    //console.log(ko.toJS(whichPhoto));
     self.selectedPhoto(whichPhoto);
   }
 
@@ -55,9 +54,9 @@ var ViewModel = function() {
   this.savePhoto = function() {
     self.appStatus('saving');
     var data = ko.toJSON(self.selectedPhoto().editables);
-    console.log(data);
+//    console.log(data);
     $.post("/photo_api/update.php", {json: data}, function(returnedData) {
-      console.log(returnedData);
+//      console.log(returnedData);
       self.appStatus('');
     });
   }

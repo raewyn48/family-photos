@@ -17,13 +17,13 @@
     </div>
   </div>
   
-  <div data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
+  <div id="photo-modal" data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
     <div id="photo-view" data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row">
-      <span data-bind="click: $root.closePhoto" class="w3-closebtn w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
-    <div class="w3-col m6 l7" id="photo-frame">
-      <img data-bind="attr: {src: photoURL}, css: { landscape: orientation() == 'landscape' }, css: { portrait: orientation() == 'portrait'}" src="" alt="" class="w3-margin-right">
+      <span data-bind="click: $root.closePhoto" class="w3-closebtn w3-text-white w3-hover-red w3-container w3-padding-hor-16 w3-display-topright">&times;</span>
+    <div class="w3-col m8" id="photo-frame">
+      <img data-bind="attr: {src: photoURL}, css: { landscape: isLandscape}" src="" alt="" class="">
     </div>
-      <div id="metadata" class="w3-black w3-col m6 l5" data-bind="with: editables">
+      <div id="metadata" class="w3-padding-left w3-black w3-col m4" data-bind="with: editables">
         <p>
             <label for="filename" class="w3-label">File Name</label>
             <input id="fielname" data-bind="textInput: FileName" type="text" class="w3-input w3-black">
