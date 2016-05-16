@@ -17,6 +17,11 @@ var Photo = function(data) {
     if (this.width > this.height) return true;
     else return false;
   }, this);
+  
+  /* Estimate the number of lines needed to view all of the content */
+  this.descriptionLines = ko.computed(function() {
+    return parseInt((this.editables.Description().length / 60) * 3);
+  }, this);
    
 }
 

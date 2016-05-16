@@ -35,7 +35,7 @@
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea id="description" type="text" data-bind="textInput: Description" class="w3-input w3-black"></textarea>
+            <textarea id="description" type="text" data-bind="editableText: Description, style: { height: $parent.descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>

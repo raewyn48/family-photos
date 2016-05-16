@@ -18,8 +18,9 @@ div#photo-view {
 }
 
 div#photo-modal {
-    padding-top: 20px;
-    padding-bottom: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: rgba(0,0,0,.8);
 }
 
 div#photo-view img {
@@ -29,6 +30,10 @@ div#photo-view img {
  max-height: 100%;
 }
 
+textarea#description {
+  min-height: 5em !important;
+  max-height: 20em !important;
+}
 
 body.saving {
   cursor: wait !important;
