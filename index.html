@@ -27,15 +27,15 @@
       <div id="metadata" class="w3-padding-left w3-black" data-bind="with: editables">
         <p>
             <label for="filename" class="w3-label">File Name</label>
-            <input id="fielname" data-bind="textInput: FileName" type="text" class="w3-input w3-black">
+            <div data-bind="text: FileName" type="text" class="w3-input w3-black"></div>
         </p>
         <p>
             <label for="title" class="w3-label">Title</label>
-            <input id="title" data-bind="value: Title" type="text" class="w3-input w3-black">
+            <input id="title" data-bind="textInput: Title" type="text" class="w3-input w3-black">
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea id="description" type="text" data-bind="editableText: Description, style: { height: $parent.descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
+            <textarea id="description" type="text" data-bind="textInput: Description, style: { height: $parent.descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>
