@@ -1,6 +1,7 @@
 var Photo = function(data) {
   self = this;
   this.editables = {
+    id: ko.observable(data.id),
     SourceFile: ko.observable(data.SourceFile),
     FileName: ko.observable(data.FileName),
     Title: ko.observable(data.Title),
@@ -30,11 +31,24 @@ var ViewModel = function() {
    
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
+  
+  var offset = 0;
+  var limit = 20;
 
-  $.getJSON("/photo_api/json/all.json", function(data) {
-    data.forEach(function(photoData) {
-      self.photoList.push(new Photo(photoData));
-    });
+  $.getJSON("/photo_api/slim/photos?limit=" + limit, function(data) {
+    if (data.length) {
+      data.forEach(function(photoData) {
+        self.photoList.push(new Photo(photoData));
+        offset += limit;
+        $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=20", function(data) {
+          if (data.length) {
+            data.forEach(function(photoData) {
+              self.photoList.push(new Photo(photoData));
+            });
+          }
+        });
+      });
+    }
   });
   
   this.selectedPhoto = ko.observable();
@@ -59,11 +73,20 @@ var ViewModel = function() {
   this.savePhoto = function() {
     self.appStatus('saving');
     var data = ko.toJSON(self.selectedPhoto().editables);
-//    console.log(data);
-    $.post("/photo_api/update.php", {json: data}, function(returnedData) {
+    var photoID = self.selectedPhoto().editables.id();
+    console.log(photoID);
+    console.log(data);
+//    $.post("/photo_api/update.php", {json: data}, function(returnedData) {
 //      console.log(returnedData);
-      self.appStatus('');
-    });
+      $.ajax({
+        type: "PUT",
+        url: "/photo_api/slim/photos",
+        data: data,
+        success: function(returnedData) {
+          console.log(returnedData);
+          self.appStatus('');
+        }
+      });
   }
   
   this.onEnter = function(d,e) {
