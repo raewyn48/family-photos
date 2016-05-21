@@ -8,22 +8,24 @@ var Photo = function(data) {
     Description: ko.observable(data.Description),
     Keywords:  ko.observableArray(data.Keywords ? [].concat(data.Keywords) : []) // Make sure it's an array
   }
-  this.thumbnailImage = ko.observable('data:image/jpeg;' + data.ThumbnailImage.replace(/^base64\:/,'base64,'));
+  this.thumbnailImage = ko.observable(data.ThumbnailImage);
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
   this.enteredKeyword = ko.observable('');
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
   
+  this.showThumbnail = ko.observable(true);
+    
   this.isLandscape = ko.computed(function() {
-    if (this.width > this.height) return true;
+    if (self.width > self.height) return true;
     else return false;
-  }, this);
+  });
   
   /* Estimate the number of lines needed to view all of the content */
   this.descriptionLines = ko.computed(function() {
-    return parseInt((this.editables.Description().length / 60) * 3);
-  }, this);
-   
+    return parseInt((self.editables.Description().length / 60) * 3);
+  });
+     
 }
 
 var ViewModel = function() {
@@ -31,25 +33,22 @@ var ViewModel = function() {
    
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
+  this.filterBy = ko.observable('');
   
   var offset = 0;
   var limit = 20;
 
-  $.getJSON("/photo_api/slim/photos?limit=" + limit, function(data) {
-    if (data.length) {
-      data.forEach(function(photoData) {
-        self.photoList.push(new Photo(photoData));
-        offset += limit;
-        $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=20", function(data) {
-          if (data.length) {
-            data.forEach(function(photoData) {
-              self.photoList.push(new Photo(photoData));
-            });
-          }
+  (function getMoreData(offset) {
+    $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=" + limit, function(data) {
+      if (data) {
+        data.forEach(function(photoData) {
+          self.photoList.push(new Photo(photoData, self));
         });
-      });
-    }
-  });
+        offset += limit;
+        getMoreData(offset);
+      }
+    });
+  })(offset);
   
   this.selectedPhoto = ko.observable();
   
@@ -74,16 +73,11 @@ var ViewModel = function() {
     self.appStatus('saving');
     var data = ko.toJSON(self.selectedPhoto().editables);
     var photoID = self.selectedPhoto().editables.id();
-    console.log(photoID);
-    console.log(data);
-//    $.post("/photo_api/update.php", {json: data}, function(returnedData) {
-//      console.log(returnedData);
       $.ajax({
         type: "PUT",
         url: "/photo_api/slim/photos",
         data: data,
         success: function(returnedData) {
-          console.log(returnedData);
           self.appStatus('');
         }
       });
@@ -103,7 +97,15 @@ var ViewModel = function() {
     // console.log(ko.toJS(self.selectedPhoto().editables.Keywords()));
     self.selectedPhoto().editables.Keywords.splice(i,1);
     // console.log(ko.toJS(self.selectedPhoto().editables.Keywords()));
+  };
+  
+  this.filterThumbnails = function() {
+    keyword = self.filterBy();
+    self.photoList().forEach(function(photo) {
+      photo.showThumbnail(photo.editables.Keywords().indexOf(keyword) > 0);
+    });
   }
+    
 
 
 };

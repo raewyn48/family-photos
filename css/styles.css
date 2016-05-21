@@ -2,6 +2,11 @@ html, body {
     height: 100%;
 }
 
+.thumbnail img {
+    max-width: 160px;
+    max-height: 160px;
+}
+
 div#metadata {
     overflow: auto;
     position: absolute;
