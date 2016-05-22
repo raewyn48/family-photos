@@ -9,8 +9,15 @@
 </head>
 <body data-bind="css: { saving: appStatus() == 'saving' } " class="">
 <div class="controls w3-container">
-  <input id="filter" data-bind="value: filterBy" type="text" class="w3-input" style="width:30%" placeholder="Enter a tag">
-  <button data-bind="click: filterThumbnails" class="w3-btn">Filter</button>
+  <div>
+    <input id="filter" data-bind="value: filterBy" type="text" class="w3-input" style="width:30%" placeholder="Enter a tag">
+    <button data-bind="click: filterThumbnails" class="w3-btn">Filter</button>
+  </div>
+  <div data-bind="if: true">
+    <div data-bind="foreach: tags">
+      <div data-bind="text: keywordWithCount" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round"></div>
+    </div>
+  </div>
 </div>
 <div class="w3-container">
   <div class="thumbnails" data-bind="foreach: photoList">

@@ -25,8 +25,24 @@ var Photo = function(data) {
   this.descriptionLines = ko.computed(function() {
     return parseInt((self.editables.Description().length / 60) * 3);
   });
-     
-}
+};
+
+var Tag = function(keyword) {
+  var self = this;
+  
+  this.keyword = ko.observable(keyword);
+  this.count = ko.observable(1);
+  this.selected = ko.observable(false);
+  
+  this.increment = function() {
+    self.count(self.count()+1);
+  };
+  
+  this.keywordWithCount = ko.computed(function() {
+    return self.keyword() + ' (' + self.count() + ')';
+  });
+  
+};
 
 var ViewModel = function() {
   var self = this;
@@ -34,22 +50,44 @@ var ViewModel = function() {
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
   this.filterBy = ko.observable('');
-  
+  var allKeywords = [];
+  this.tags = ko.observableArray([]);
+  this.dataLoaded = ko.observable(false);
+
   var offset = 0;
   var limit = 20;
+  
 
   (function getMoreData(offset) {
     $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=" + limit, function(data) {
       if (data) {
         data.forEach(function(photoData) {
           self.photoList.push(new Photo(photoData, self));
+          photoData.Keywords.forEach(function(keyword) {
+            var keywordIndex = allKeywords.indexOf(keyword)
+            if (keywordIndex < 0) {
+              allKeywords.push(keyword);
+              self.tags.push(new Tag(keyword));
+              self.tags.sort(function (left, right) {
+                return left.keyword() == right.keyword() ? 0: (left.keyword() < right.keyword() ? -1 : 1);
+              });
+            }
+            else {
+              self.tags()[keywordIndex].increment();
+            }
+          });
         });
         offset += limit;
         getMoreData(offset);
       }
+      else {
+        /* Data is all loaded */
+        self.dataLoaded(true);
+        
+      }
     });
   })(offset);
-  
+    
   this.selectedPhoto = ko.observable();
   
   this.selectPhoto = function(whichPhoto) {
@@ -102,7 +140,7 @@ var ViewModel = function() {
   this.filterThumbnails = function() {
     keyword = self.filterBy();
     self.photoList().forEach(function(photo) {
-      photo.showThumbnail(photo.editables.Keywords().indexOf(keyword) > 0);
+      photo.showThumbnail(photo.editables.Keywords().indexOf(keyword) >= 0);
     });
   }
     
