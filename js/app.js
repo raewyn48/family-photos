@@ -1,24 +1,24 @@
-var Photo = function(data) {
+var Photo = function(data, tagList) {
   self = this;
-  this.editables = {
-    id: ko.observable(data.id),
-    SourceFile: ko.observable(data.SourceFile),
-    FileName: ko.observable(data.FileName),
-    Title: ko.observable(data.Title),
-    Description: ko.observable(data.Description),
-    Keywords:  ko.observableArray(data.Keywords ? [].concat(data.Keywords) : []) // Make sure it's an array
-  }
+  if (data.Keywords == '') data.Keywords = [];
+  
   this.thumbnailImage = ko.observable(data.ThumbnailImage);
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
   this.enteredKeyword = ko.observable('');
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
     
-//  this.showThumbnail = ko.observable(true);
-
-  this.keywords = ko.computed(function() {
-    return self.editables.Keywords();    
-  });
+  // this.tags is an array of Tags
+  this.tags = $.map(data.Keywords, function(keyword) { return tagList.addTag(keyword) });
+  
+  this.editables = {
+    id: ko.observable(data.id),
+    SourceFile: ko.observable(data.SourceFile),
+    FileName: ko.observable(data.FileName),
+    Title: ko.observable(data.Title),
+    Description: ko.observable(data.Description),
+    Keywords:  ko.computed(function() { return $.map(self.tags, function(tag) { return tag.keyword } )})
+  };
     
   this.isLandscape = ko.computed(function() {
     if (self.width > self.height) return true;
@@ -29,6 +29,16 @@ var Photo = function(data) {
   this.descriptionLines = ko.computed(function() {
     return parseInt((self.editables.Description().length / 60) * 3);
   });
+  
+  this.editables.Keywords.subscribe(function(change) {
+    change.forEach(function(keywordChange) {
+      if (keywordChange.status == 'deleted') {
+        // Need some link between this photo's keywords and the main keyword/tag list
+      }
+    });
+    console.log(change[0].status, change[0].index, change[0].value);
+  }, null, "arrayChange");
+  
 };
 
 var Tag = function(keyword, count) {
@@ -42,7 +52,29 @@ var Tag = function(keyword, count) {
     return self.keyword() + ' (' + self.count() + ')';
   });
   
+  this.increment = function() {
+    self.count(self.count()+1);
+  }
+  
 };
+
+var TagList = function() {
+  var self = this;
+  this.tags = ko.observableArray([]);
+  
+  this.addTag = function(keyword) {
+    if (existing = ko.utils.arrayFirst(self.tags(), function(item) { return item.keyword()==keyword }) ) {
+      existing.increment();
+      return existing;
+    }
+    else {
+      newTag = new Tag(keyword, 1);
+      self.tags.push(newTag);
+      return newTag;
+    }
+  }       
+};
+
 
 var ViewModel = function() {
   var self = this;
@@ -54,7 +86,8 @@ var ViewModel = function() {
   this.tags = ko.observableArray([]);
   this.dataLoaded = ko.observable(false);
   this.selectedPhoto = ko.observable();
-
+  this.tagList = new TagList();
+	
   var offset = 0;
   var limit = 20;
   
@@ -62,13 +95,13 @@ var ViewModel = function() {
   var fetchedPhotos = [];
   var keywordCount = {};
   
-
   (function getMoreData(offset) {
     $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=" + limit, function(data) {
       if (data) {
-        var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo) });
+        var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
         self.photoList.push.apply(self.photoList, fetchedPhotos);
-                
+        
+/*        
         data.forEach(function(photoData) {
           photoData.Keywords.forEach(function(keyword) {
             var keywordIndex = allKeywords.indexOf(keyword)
@@ -84,23 +117,26 @@ var ViewModel = function() {
         self.tags($.map(allKeywords.sort(), function(keyword) { return new Tag(keyword, keywordCount[keyword]) }));
 
         fetchedPhotos = [];
-
+*/
         offset += limit;
         getMoreData(offset);
       }
       else {
         /* Data is all loaded */
         self.dataLoaded(true);
-        
       }
     });
   })(offset);
   
+  this.keywordList = ko.computed(function() {
+    //console.log(ko.toJSON(self.tagList.tags));
+    return self.tagList.tags();
+  });
+  
   this.setFilter = function(tag) {
     self.filterBy(tag.keyword());
-  }
+  };
     
-  
   this.selectPhoto = function(whichPhoto) {
     //console.log(ko.toJS(whichPhoto));
     self.selectedPhoto(whichPhoto);

@@ -15,7 +15,7 @@
     <button data-bind="" class="w3-btn">Filter</button>
   </div>
   <div data-bind="if: true" class="w3-small">
-    <ul data-bind="foreach: tags">
+    <ul data-bind="foreach: keywordList">
       <li><a href="#" data-bind="text: keywordWithCount, click: $parent.setFilter" class="keyword"></a></li>
     </ul>
   </div>
