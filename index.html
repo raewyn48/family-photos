@@ -25,7 +25,7 @@
     <span data-bind="filter: keywords">
       <div class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity w3-show-inline-block">
         <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage }" src="" alt="" class="">
-        <div data-bind="text: editables.FileName" class="w3-small w3-center"></div>
+        <div data-bind="text: FileName" class="w3-small w3-center"></div>
       </div>
     </span>
   </div>
@@ -37,7 +37,7 @@
         <img data-bind="attr: {src: photoURL}, css: { landscape: isLandscape}" src="" alt="" class="w3-card-24">
       </div>
     
-      <div id="metadata" class="w3-padding-left w3-black" data-bind="with: editables">
+      <div id="metadata" class="w3-padding-left w3-black">
         <p>
             <label for="filename" class="w3-label">File Name</label>
             <div data-bind="text: FileName" type="text" class="w3-input w3-black"></div>
@@ -48,11 +48,11 @@
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea id="description" type="text" data-bind="textInput: Description, style: { height: $parent.descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
+            <textarea id="description" type="text" data-bind="textInput: Description, style: { height: descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>
-            <input id="keywords" data-bind="textInput: $parent.enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input w3-black">
+            <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input w3-black">
             <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
               <span data-bind="text: $data, click: function() { $root.removeKeyword($index()); }" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round w3-hover-red"></span>
             </div>	
