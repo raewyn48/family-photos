@@ -13,8 +13,12 @@ var Photo = function(data) {
   this.enteredKeyword = ko.observable('');
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
-  
-  this.showThumbnail = ko.observable(true);
+    
+//  this.showThumbnail = ko.observable(true);
+
+  this.keywords = ko.computed(function() {
+    return self.editables.Keywords();    
+  });
     
   this.isLandscape = ko.computed(function() {
     if (self.width > self.height) return true;
@@ -27,16 +31,12 @@ var Photo = function(data) {
   });
 };
 
-var Tag = function(keyword) {
+var Tag = function(keyword, count) {
   var self = this;
   
   this.keyword = ko.observable(keyword);
-  this.count = ko.observable(1);
+  this.count = ko.observable(count);
   this.selected = ko.observable(false);
-  
-  this.increment = function() {
-    self.count(self.count()+1);
-  };
   
   this.keywordWithCount = ko.computed(function() {
     return self.keyword() + ' (' + self.count() + ')';
@@ -50,33 +50,41 @@ var ViewModel = function() {
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
   this.filterBy = ko.observable('');
-  var allKeywords = [];
+  this.enteredKeyword = ko.observable('');
   this.tags = ko.observableArray([]);
   this.dataLoaded = ko.observable(false);
+  this.selectedPhoto = ko.observable();
 
   var offset = 0;
   var limit = 20;
+  
+  var allKeywords = [];
+  var fetchedPhotos = [];
+  var keywordCount = {};
   
 
   (function getMoreData(offset) {
     $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=" + limit, function(data) {
       if (data) {
+        var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo) });
+        self.photoList.push.apply(self.photoList, fetchedPhotos);
+                
         data.forEach(function(photoData) {
-          self.photoList.push(new Photo(photoData, self));
           photoData.Keywords.forEach(function(keyword) {
             var keywordIndex = allKeywords.indexOf(keyword)
             if (keywordIndex < 0) {
               allKeywords.push(keyword);
-              self.tags.push(new Tag(keyword));
-              self.tags.sort(function (left, right) {
-                return left.keyword() == right.keyword() ? 0: (left.keyword() < right.keyword() ? -1 : 1);
-              });
+              keywordCount[keyword] = 1;
             }
             else {
-              self.tags()[keywordIndex].increment();
+              keywordCount[keyword]++;
             }
           });
         });
+        self.tags($.map(allKeywords.sort(), function(keyword) { return new Tag(keyword, keywordCount[keyword]) }));
+
+        fetchedPhotos = [];
+
         offset += limit;
         getMoreData(offset);
       }
@@ -87,8 +95,11 @@ var ViewModel = function() {
       }
     });
   })(offset);
+  
+  this.setFilter = function(tag) {
+    self.filterBy(tag.keyword());
+  }
     
-  this.selectedPhoto = ko.observable();
   
   this.selectPhoto = function(whichPhoto) {
     //console.log(ko.toJS(whichPhoto));
@@ -131,10 +142,7 @@ var ViewModel = function() {
   };
   
   this.removeKeyword = function(i) {
-    // console.log("removing " + i);
-    // console.log(ko.toJS(self.selectedPhoto().editables.Keywords()));
     self.selectedPhoto().editables.Keywords.splice(i,1);
-    // console.log(ko.toJS(self.selectedPhoto().editables.Keywords()));
   };
   
   this.filterThumbnails = function() {
@@ -143,9 +151,6 @@ var ViewModel = function() {
       photo.showThumbnail(photo.editables.Keywords().indexOf(keyword) >= 0);
     });
   }
-    
-
-
 };
 
 ko.applyBindings(new ViewModel());
