@@ -52,3 +52,21 @@ span.keyword:hover:after {
   content: ' x';
   color: #ccc;
 }
+
+div.controls {
+    height: 100vh;
+    overflow-x: visible;
+    overflow-y: scroll;
+}
+
+.controls li {
+    list-style-type: none;
+}
+
+.controls li:before {
+    content: '- '
+}
+
+.controls ul {
+    padding-left: 0px;
+}

@@ -8,18 +8,18 @@ var Photo = function(data, tagList) {
 
   if (data.Keywords == '') data.Keywords = [];
   
-  // this.tags is an array of Tags
+  /* an array of Tags (objects) */
   this.tags = ko.observableArray($.map(data.Keywords, function(keyword) { return tagList.addTag(keyword) }));
 
-  /* return an array of text keywords */
+  /* an array of plaintext keywords */
   this.Keywords = ko.computed(function() { return $.map(self.tags(), function(tag) { return tag.keyword() } ) })
   
   this.thumbnailImage = ko.observable(data.ThumbnailImage);
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
-
-  this.enteredKeyword = ko.observable(''); 
+  
+  this.enteredKeyword = ko.observable(''); // keyword typed in to be saved
     
       
   this.isLandscape = ko.computed(function() {
@@ -52,7 +52,7 @@ var Tag = function(keyword, count) {
   
   this.keyword = ko.observable(keyword);
   this.count = ko.observable(count);
-  this.selected = ko.observable(false);
+  // this.selected = ko.observable(false);
   
   this.keywordWithCount = ko.computed(function() {
     return self.keyword() + ' (' + self.count() + ')';
@@ -102,20 +102,17 @@ var ViewModel = function() {
    
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
-  this.filterBy = ko.observable('');
-  this.enteredKeyword = ko.observable('');
-  this.tags = ko.observableArray([]);
-  this.dataLoaded = ko.observable(false);
-  this.selectedPhoto = ko.observable();
-  this.tagList = new TagList();
+  this.filterBy = ko.observable('');  // keyword used for filtering
+  this.enteredKeyword = ko.observable(''); // for filtering
+  //this.tags = ko.observableArray([]);
+  this.dataLoaded = ko.observable(false); // true when all photos loaded
+  this.selectedPhoto = ko.observable(); // photo showing in full view
+  
+  this.tagList = new TagList(); // List of all tags for all photos
 	
   var offset = 0;
   var limit = 20;
-  
-  var allKeywords = [];
-  var fetchedPhotos = [];
-  var keywordCount = {};
-  
+   
   var numPages = 2;
   
   (function getMoreData(offset,page) {
@@ -136,17 +133,17 @@ var ViewModel = function() {
     }
   })(offset, 1);
   
+  /* return a list of plain text keywords */
   this.keywordList = ko.computed(function() {
-    //console.log(ko.toJSON(self.tagList.tags));
     return self.tagList.tags();
   });
+  
   
   this.setFilter = function(tag) {
     self.filterBy(tag.keyword());
   };
     
   this.selectPhoto = function(whichPhoto) {
-    //console.log(ko.toJS(whichPhoto));
     self.selectedPhoto(whichPhoto);
   }
 
@@ -157,9 +154,6 @@ var ViewModel = function() {
   
   this.photoSelected = function() {
     return self.selectedPhoto();
-  }
-  
-  this.saveField = function(data, event) {
   }
   
   this.savePhoto = function() {
@@ -175,12 +169,13 @@ var ViewModel = function() {
     });
   }
   
-  this.onEnter = function(d,e) {
+  this.keywordEntered = function(d,e) {
+    /* If enter key pressed */
     if (e.keyCode === 13) {
       var newWord = self.selectedPhoto().enteredKeyword();
       self.selectedPhoto().tags.push(self.tagList.addTag(newWord));
       self.selectedPhoto().enteredKeyword(null);
-   }
+    }
     return true;
   };
   
@@ -189,12 +184,14 @@ var ViewModel = function() {
     self.tagList.removeTag(removedTagArray[0].keyword());
   };
   
-  this.filterThumbnails = function() {
-    keyword = self.filterBy();
-    self.photoList().forEach(function(photo) {
-      photo.showThumbnail(photo.editables.Keywords().indexOf(keyword) >= 0);
-    });
-  }
+  // this.filterThumbnails = function() {
+    // keyword = self.filterBy();
+    // self.photoList().forEach(function(photo) {
+      // photo.showThumbnail(photo.Keywords().indexOf(keyword) >= 0);
+    // });
+  // }
+  
+  
 };
 
 ko.applyBindings(new ViewModel());
