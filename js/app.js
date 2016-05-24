@@ -31,10 +31,9 @@ var Photo = function(data, tagList) {
   this.descriptionLines = ko.computed(function() {
     return parseInt((self.Description().length / 60) * 3);
   });
-  
+    
   this.toJSON = function() {
-    var saveFields = ['id', 'FileName', 'Title', 'Description', 'Keywords'];
-    return ko.toJSON($.map(saveFields, function(field) { return self[field] }));
+    return ko.toJSON({id: self.id, FileName: self.FileName, Title: self.Title, Description: self.Description, Keywords: self.Keywords});
   };
   
   // this.editables.Keywords.subscribe(function(change) {
@@ -166,14 +165,11 @@ var ViewModel = function() {
   this.savePhoto = function() {
     self.appStatus('saving');
     var data = self.selectedPhoto().toJSON();
-    console.log(data);
-    var photoID = self.selectedPhoto().id();
     $.ajax({
       type: "PUT",
       url: "/photo_api/slim/photos",
       data: data,
       success: function(returnedData) {
-        console.log(returnedData);
         self.appStatus('');
       }
     });
