@@ -10,10 +10,6 @@
 <body data-bind="css: { saving: appStatus() == 'saving' } " class="">
 <div class="w3-row-padding">
 <div class="controls w3-col" style="width: 200px">
-  <div>
-    <input id="filter" data-bind="value: enteredKeyword" type="text" class="w3-input" placeholder="Enter a tag">
-    <button data-bind="" class="w3-btn">Filter</button>
-  </div>
   <div data-bind="if: true" class="w3-small">
     <ul data-bind="foreach: keywordList">
       <li><a href="#" data-bind="text: keywordWithCount, click: $parent.setFilter" class="keyword"></a></li>
@@ -22,7 +18,7 @@
 </div>
 <div class="w3-rest">
   <div class="thumbnails" data-bind="foreach: photoList">
-    <span data-bind="filter: keywords">
+    <span data-bind="filter: Keywords">
       <div class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity w3-show-inline-block">
         <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage }" src="" alt="" class="">
         <div data-bind="text: FileName" class="w3-small w3-center"></div>
@@ -52,7 +48,7 @@
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>
-            <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: $root.onEnter}" type="text" class="w3-input w3-black">
+            <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: $root.keywordEntered}" type="text" class="w3-input w3-black">
             <div data-bind="foreach: Keywords" class="w3-container w3-padding-tiny">
               <span data-bind="text: $data, click: function() { $root.removeKeyword($index()); }" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round w3-hover-red"></span>
             </div>	
