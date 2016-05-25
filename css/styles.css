@@ -44,13 +44,23 @@ body.saving {
   cursor: wait !important;
 }
 
-span.keyword:hover {
-  cursor: pointer;
+span.keyword {
+  position: relative;
+  margin-right: 12px !important;
+  padding-right: 8px !important;
 }
 
-span.keyword:hover:after {
+span.keyword:hover {
+  cursor: pointer;
+  padding-right: 20px !important;
+  margin-right: 0 !important;
+}
+
+span.keyword:hover::after {
   content: ' x';
   color: #ccc;
+  position: absolute;
+  right: 5px;
 }
 
 div.controls {
@@ -63,7 +73,7 @@ div.controls {
     list-style-type: none;
 }
 
-.controls li:before {
+.controls li::before {
     content: '- '
 }
 
