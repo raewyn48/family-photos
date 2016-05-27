@@ -11,7 +11,8 @@ var Photo = function(data, tagList) {
   /* an array of {Tag, _destroy} */
   this.tags = ko.observableArray($.map(data.Keywords, function(keyword) {
     return {
-      tag: tagList.addTag(keyword), 
+      tag: tagList.addTag(keyword),
+      _destory: false
     }
   }));
   
@@ -22,21 +23,23 @@ var Photo = function(data, tagList) {
   };
 
   /* an array of {keyword, _destroy} */
-  // this.Keywords = ko.computed(function() { 
-    // keywordArray = $.map(self.tags(), function(tag) { 
-      // return { 
-        // keyword: ko.observable(tag.tag.keyword()), 
-        // _destroy: ko.observable(tag._destroy()) };
-    // }); 
-    // return keywordArray;
-  // });
+  this.Keywords = function() { 
+    keywordArray = $.map(self.tags(), function(tag) { 
+      return { 
+        keyword: tag.tag.keyword(), 
+        _destroy: tag._destroy
+      }
+    }); 
+    return keywordArray;
+  };
   
   this.copyKeywords = function() {
     keywordArray = $.map(self.tags(), function(tag) { 
       keyword = tag.tag.keyword();
+      destroy = tag.tag._destroy;
       return { 
         keyword: ko.observable(keyword), 
-        _destroy: ko.observable(false) 
+        _destroy: ko.observable(destroy) 
       };
     });
     return keywordArray;
@@ -102,18 +105,17 @@ var Photo = function(data, tagList) {
     self.Description = self.editData.Description;
     self.editData.Keywords().forEach(function(keyword, index) {
       if (keyword._add) {
-        self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: ko.observable(false)});
+        self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: false});
       }
       if (keyword._destroy()) {
-        self.tags()[index]._destroy(true);
+        self.tags()[index]._destroy = true;
         tagList.removeTag(keyword.keyword()); 
-        console.log(ko.toJS(tagList));
       }      
     });
   }
     
   this.toJSON = function() {
-    return ko.toJSON({id: self.id, FileName: self.FileName, Title: self.Title, Description: self.Description, Keywords: self.Keywords});
+    return ko.toJSON({id: self.id, FileName: self.FileName, Title: self.Title, Description: self.Description, Keywords: self.Keywords()});
   };
   
   // this.editables.Keywords.subscribe(function(change) {
@@ -234,7 +236,7 @@ var ViewModel = function() {
     else {
       return ko.utils.arrayFilter(self.photoList(), function(eachPhoto) {
         var keywords = eachPhoto.keywordList();
-        return (keywords.indexOf(filterKeyword) >= 0); 
+	        return (keywords.indexOf(filterKeyword) >= 0); 
       });
     }
   });
@@ -248,7 +250,7 @@ var ViewModel = function() {
   }
   
   this.savePhoto = function() {
-    // self.appStatus('saving');
+    self.appStatus('saving');
     self.selectedPhoto().saveChanges(self.tagList);
     
     var data = self.selectedPhoto().toJSON();
