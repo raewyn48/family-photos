@@ -1,18 +1,25 @@
 var Photo = function(data, tagList) {
   var self = this;
 
-  this.id = ko.observable(data.id);
-  this.FileName = ko.observable(data.FileName);
-  this.Title = ko.observable(data.Title);
-  this.Description = ko.observable(data.Description);
+  this.id = data.id;
+  this.FileName = data.FileName;
+  this.Title = data.Title;
+  this.Description = data.Description;
 
   if (data.Keywords == '') data.Keywords = [];
   
-  /* an array of Tags (objects) */
-  this.tags = ko.observableArray($.map(data.Keywords, function(keyword) { return tagList.addTag(keyword) }));
+  /* an array of {Tag, _destroy} */
+  this.tags = ko.observableArray($.map(data.Keywords, function(keyword) { return {tag: tagList.addTag(keyword), _destroy: ko.observable(false) }}));
 
-  /* an array of plaintext keywords */
-  this.Keywords = ko.computed(function() { return $.map(self.tags(), function(tag) { return tag.keyword() } ) })
+  /* an array of {keyword, _destroy} */
+  this.Keywords = ko.computed(function() { 
+    keywordArray = $.map(self.tags(), function(tag) { 
+      return { 
+        keyword: ko.observable(tag.tag.keyword()), 
+        _destroy: ko.observable(tag._destroy()) };
+    }); 
+    return keywordArray;
+  });
   
   this.thumbnailImage = ko.observable(data.ThumbnailImage);
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
@@ -29,8 +36,56 @@ var Photo = function(data, tagList) {
   
   /* Estimate the number of lines needed to view all of the content */
   this.descriptionLines = ko.computed(function() {
-    return parseInt((self.Description().length / 60) * 3);
+    return parseInt((self.Description.length / 60) * 3);
   });
+  
+  // this.backUp = function() {
+    // self.backUp = {id: self.id(), FileName: self.FileName(), Title: self.Title(), Description: self.Description(), Keywords: self.Keywords()};
+  // };
+  
+  this.copyToEdit = function() {
+    self.editData = {
+      Title: self.Title,
+      Description: self.Description,
+      Keywords: ko.observableArray(self.Keywords())
+    };
+  };
+  
+  this.removeKeyword = function(keyword) {
+    keyword._destroy(true);
+    console.log(ko.toJS(self.editData.Keywords));
+  };
+  
+  this.keywordEntered = function(d,e) {
+    /* If enter key pressed */
+    if (e.keyCode === 13) {
+      self.editData.Keywords.push({
+        keyword: ko.observable(this.enteredKeyword()), 
+        _destroy: ko.observable(false),
+        _add: true
+      });
+      self.enteredKeyword(null);
+
+
+    }
+    return true;
+  };
+
+    
+  this.saveChanges = function(tagList) {
+    self.Title = self.editData.Title;
+    self.Description = self.editData.Description;
+    self.editData.Keywords().forEach(function(keyword, index) {
+      if (keyword._add) {
+        self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: ko.observable(false)});
+      }
+      if (keyword._destroy()) {
+        self.tags()[index]._destroy(true);
+        tagList.removeTag(keyword.keyword()); 
+        console.log(ko.toJS(tagList));
+      }      
+    });
+  }
     
   this.toJSON = function() {
     return ko.toJSON({id: self.id, FileName: self.FileName, Title: self.Title, Description: self.Description, Keywords: self.Keywords});
@@ -81,12 +136,13 @@ var TagList = function() {
     else {
       newTag = new Tag(keyword, 1);
       self.tags.push(newTag);
-      self.tags.sort(function (left, right) { return left.keyword() == right.keyword() ? 0 : (left.keyword() < right.keyword() ? -1 : 1) });
+      self.tags.sort(function (left, right) { return left.keyword() == right.keyword() ? 0 : (left.keyword().toLowerCase() < right.keyword().toLowerCase() ? -1 : 1) });
       return newTag;
     }
   };
   
   this.removeTag = function(keyword) {
+    console.log('keyword is ' +keyword);
     if (tag = ko.utils.arrayFirst(self.tags(), function(item) { return item.keyword()==keyword }) ) {
       if (tag.decrement() == 0) {
         self.tags.remove( tag );
@@ -104,7 +160,6 @@ var ViewModel = function() {
   this.appStatus = ko.observable('');
   this.filterBy = ko.observable('');  // keyword used for filtering
   this.enteredKeyword = ko.observable(''); // for filtering
-  //this.tags = ko.observableArray([]);
   this.dataLoaded = ko.observable(false); // true when all photos loaded
   this.selectedPhoto = ko.observable(); // photo showing in full view
   
@@ -144,11 +199,11 @@ var ViewModel = function() {
   };
     
   this.selectPhoto = function(whichPhoto) {
+    whichPhoto.copyToEdit();
     self.selectedPhoto(whichPhoto);
   }
 
   this.closePhoto = function() {
-    self.savePhoto();
     self.selectedPhoto(null);
   }
   
@@ -157,7 +212,9 @@ var ViewModel = function() {
   }
   
   this.savePhoto = function() {
-    self.appStatus('saving');
+    // self.appStatus('saving');
+    self.selectedPhoto().saveChanges(self.tagList);
+    
     var data = self.selectedPhoto().toJSON();
     $.ajax({
       type: "PUT",
@@ -165,24 +222,20 @@ var ViewModel = function() {
       data: data,
       success: function(returnedData) {
         self.appStatus('');
+        console.log(returnedData);
       }
     });
   }
   
-  this.keywordEntered = function(d,e) {
-    /* If enter key pressed */
-    if (e.keyCode === 13) {
-      var newWord = self.selectedPhoto().enteredKeyword();
-      self.selectedPhoto().tags.push(self.tagList.addTag(newWord));
-      self.selectedPhoto().enteredKeyword(null);
-    }
-    return true;
-  };
+  this.saveAndClose = function() {
+    self.savePhoto();
+    self.closePhoto();
+  }
   
-  this.removeKeyword = function(i) {
-    removedTagArray = self.selectedPhoto().tags.splice(i,1);
-    self.tagList.removeTag(removedTagArray[0].keyword());
-  };
+  this.cancel = function() {
+    self.editData = null;
+    self.selectedPhoto(null);
+  }  
   
   // this.filterThumbnails = function() {
     // keyword = self.filterBy();
