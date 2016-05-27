@@ -28,7 +28,7 @@
   
   <div id="photo-modal" data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
     <div data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row" style="background: none; width: 100%; height: 100%;">
-      <span data-bind="click: $root.saveAndClose" class="w3-closebtn w3-text-white w3-hover-red w3-container w3-padding-hor-16 w3-display-topright" style="z-index:10">&times;</span>
+ 
       <div id="photo-view">
         <img data-bind="attr: {src: photoURL}, css: { landscape: isLandscape}" src="" alt="" class="w3-card-24">
       </div>

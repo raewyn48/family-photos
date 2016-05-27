@@ -21,6 +21,18 @@ var Photo = function(data, tagList) {
     return keywordArray;
   });
   
+  this.copyKeywords = function() {
+    keywordArray = $.map(self.tags(), function(tag) { 
+      keyword = tag.tag.keyword();
+      _destroy = tag._destroy();
+      return { 
+        keyword: ko.observable(keyword), 
+        _destroy: ko.observable(_destroy) 
+      };
+    });
+    return keywordArray;
+  }
+  
   this.thumbnailImage = ko.observable(data.ThumbnailImage);
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
   this.width = data.ImageWidth;
@@ -47,8 +59,12 @@ var Photo = function(data, tagList) {
     self.editData = {
       Title: self.Title,
       Description: self.Description,
-      Keywords: ko.observableArray(self.Keywords())
+      Keywords: ko.observableArray(self.copyKeywords())
     };
+  };
+  
+  this.cancel = function() {
+    self.editData = null;
   };
   
   this.removeKeyword = function(keyword) {
@@ -233,7 +249,7 @@ var ViewModel = function() {
   }
   
   this.cancel = function() {
-    self.editData = null;
+    self.selectedPhoto().cancel();
     self.selectedPhoto(null);
   }  
   
