@@ -9,25 +9,34 @@ var Photo = function(data, tagList) {
   if (data.Keywords == '') data.Keywords = [];
   
   /* an array of {Tag, _destroy} */
-  this.tags = ko.observableArray($.map(data.Keywords, function(keyword) { return {tag: tagList.addTag(keyword), _destroy: ko.observable(false) }}));
+  this.tags = ko.observableArray($.map(data.Keywords, function(keyword) {
+    return {
+      tag: tagList.addTag(keyword), 
+    }
+  }));
+  
+  this.keywordList = function() {
+      return $.map(self.tags(), function(tag) {
+        return tag.tag.keyword();
+      });
+  };
 
   /* an array of {keyword, _destroy} */
-  this.Keywords = ko.computed(function() { 
-    keywordArray = $.map(self.tags(), function(tag) { 
-      return { 
-        keyword: ko.observable(tag.tag.keyword()), 
-        _destroy: ko.observable(tag._destroy()) };
-    }); 
-    return keywordArray;
-  });
+  // this.Keywords = ko.computed(function() { 
+    // keywordArray = $.map(self.tags(), function(tag) { 
+      // return { 
+        // keyword: ko.observable(tag.tag.keyword()), 
+        // _destroy: ko.observable(tag._destroy()) };
+    // }); 
+    // return keywordArray;
+  // });
   
   this.copyKeywords = function() {
     keywordArray = $.map(self.tags(), function(tag) { 
       keyword = tag.tag.keyword();
-      _destroy = tag._destroy();
       return { 
         keyword: ko.observable(keyword), 
-        _destroy: ko.observable(_destroy) 
+        _destroy: ko.observable(false) 
       };
     });
     return keywordArray;
@@ -174,7 +183,7 @@ var ViewModel = function() {
    
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
-  this.filterBy = ko.observable('');  // keyword used for filtering
+  this.filterBy = ko.observable(null);  // keyword used for filtering
   this.enteredKeyword = ko.observable(''); // for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
   this.selectedPhoto = ko.observable(); // photo showing in full view
@@ -218,6 +227,17 @@ var ViewModel = function() {
     whichPhoto.copyToEdit();
     self.selectedPhoto(whichPhoto);
   }
+  
+  this.filteredPhotos = ko.computed(function() {
+    var filterKeyword = self.filterBy()
+    if (self.filterBy() == null) return self.photoList;
+    else {
+      return ko.utils.arrayFilter(self.photoList(), function(eachPhoto) {
+        var keywords = eachPhoto.keywordList();
+        return (keywords.indexOf(filterKeyword) >= 0); 
+      });
+    }
+  });
 
   this.closePhoto = function() {
     self.selectedPhoto(null);
