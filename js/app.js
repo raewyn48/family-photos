@@ -12,22 +12,22 @@ var Photo = function(data, tagList) {
   this.tags = ko.observableArray($.map(data.Keywords, function(keyword) {
     return {
       tag: tagList.addTag(keyword),
-      _destory: false
+      _destroy: ko.observable(false) 
     }
   }));
   
-  this.keywordList = function() {
-      return $.map(self.tags(), function(tag) {
-        return tag.tag.keyword();
-      });
-  };
-
+  this.keywordList = ko.computed(function() {
+    return $.map(self.tags(), function(tag) {
+      if (!tag._destroy()) return tag.tag.keyword();
+    });
+  });
+  
   /* an array of {keyword, _destroy} */
   this.Keywords = function() { 
     keywordArray = $.map(self.tags(), function(tag) { 
       return { 
         keyword: tag.tag.keyword(), 
-        _destroy: tag._destroy
+        _destroy: tag._destroy()
       }
     }); 
     return keywordArray;
@@ -36,7 +36,7 @@ var Photo = function(data, tagList) {
   this.copyKeywords = function() {
     keywordArray = $.map(self.tags(), function(tag) { 
       keyword = tag.tag.keyword();
-      destroy = tag.tag._destroy;
+      destroy = tag._destroy();
       return { 
         keyword: ko.observable(keyword), 
         _destroy: ko.observable(destroy) 
@@ -81,7 +81,6 @@ var Photo = function(data, tagList) {
   
   this.removeKeyword = function(keyword) {
     keyword._destroy(true);
-    console.log(ko.toJS(self.editData.Keywords));
   };
   
   this.keywordEntered = function(d,e) {
@@ -105,10 +104,10 @@ var Photo = function(data, tagList) {
     self.Description = self.editData.Description;
     self.editData.Keywords().forEach(function(keyword, index) {
       if (keyword._add) {
-        self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: false});
+        self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: ko.observable(false)});
       }
       if (keyword._destroy()) {
-        self.tags()[index]._destroy = true;
+        self.tags()[index]._destroy(true);
         tagList.removeTag(keyword.keyword()); 
       }      
     });
@@ -169,7 +168,6 @@ var TagList = function() {
   };
   
   this.removeTag = function(keyword) {
-    console.log('keyword is ' +keyword);
     if (tag = ko.utils.arrayFirst(self.tags(), function(item) { return item.keyword()==keyword }) ) {
       if (tag.decrement() == 0) {
         self.tags.remove( tag );
@@ -186,9 +184,9 @@ var ViewModel = function() {
   this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
   this.filterBy = ko.observable(null);  // keyword used for filtering
-  this.enteredKeyword = ko.observable(''); // for filtering
+  this.enteredKeyword = ko.observable(''); // text input for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
-  this.selectedPhoto = ko.observable(); // photo showing in full view
+  this.selectedPhoto = ko.observable(null); // photo showing in full view
   
   this.tagList = new TagList(); // List of all tags for all photos
 	
@@ -236,7 +234,7 @@ var ViewModel = function() {
     else {
       return ko.utils.arrayFilter(self.photoList(), function(eachPhoto) {
         var keywords = eachPhoto.keywordList();
-	        return (keywords.indexOf(filterKeyword) >= 0); 
+	      return (keywords.indexOf(filterKeyword) >= 0); 
       });
     }
   });
@@ -246,7 +244,7 @@ var ViewModel = function() {
   }
   
   this.photoSelected = function() {
-    return self.selectedPhoto();
+    return self.selectedPhoto() != null;
   }
   
   this.savePhoto = function() {
@@ -260,7 +258,6 @@ var ViewModel = function() {
       data: data,
       success: function(returnedData) {
         self.appStatus('');
-        console.log(returnedData);
       }
     });
   }
