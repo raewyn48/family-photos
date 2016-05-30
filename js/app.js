@@ -262,7 +262,7 @@ var ViewModel = function() {
   var offset = 0;
   var limit = 20;
    
-  var numPages = 2;
+  var numPages = 300;
   
   (function getMoreData(offset,page) {
     if (page <= numPages) {
