@@ -73,10 +73,32 @@ div.controls {
     list-style-type: none;
 }
 
-.controls li::before {
+.controls li.tag::before {
     content: '- '
 }
 
 .controls ul {
     padding-left: 0px;
+}
+
+li.tag.selected {
+    font-weight: bold;
+}
+
+li.tag a {
+    text-decoration: none;
+}
+
+.controls li.group::before {
+    content: '> '
+}
+
+li.group {
+  padding-top: 10px;
+  cursor:pointer;
+}
+
+ul.tags {
+  margin-left: 10px;
+  margin-top: 10px;
 }

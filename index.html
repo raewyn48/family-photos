@@ -11,8 +11,13 @@
 <div class="w3-row-padding">
 <div class="controls w3-col" style="width: 200px">
   <div data-bind="if: true" class="w3-small">
-    <ul data-bind="foreach: keywordList">
-      <li><a href="#" data-bind="text: keywordWithCount, click: $parent.setFilter" class="keyword"></a></li>
+    <ul data-bind="foreach: groupList">
+      <li class="group" data-bind="text: groupDisplay, css: {expanded: expanded}, click: toggleExpand"></li>
+      <div data-bind="visible: expanded">
+        <ul data-bind="foreach: tags" class="tags">
+          <li class="tag" data-bind="css: {selected: selected}"><a href="#" data-bind="text: keywordWithCount, click: $root.setFilter" class="keyword"></a></li>
+        </ul>
+      </div>
     </ul>
   </div>
 </div>
