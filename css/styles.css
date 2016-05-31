@@ -2,9 +2,25 @@ html, body {
     height: 100%;
 }
 
-.thumbnail img {
-    max-width: 160px;
-    max-height: 160px;
+.thumbnails {
+  text-align: justify;
+}
+
+.thumbnails::after {
+  content: '';
+  width: 100%;
+  display: inline-block;
+}
+
+.thumbnail-wrapper {
+  width: 210px;
+  text-align: center;
+  vertical-align: top;
+  display: inline-block;
+}
+
+.thumbnail {
+  display: inline-block;
 }
 
 div#metadata {

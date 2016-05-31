@@ -3,8 +3,12 @@ var Photo = function(data, tagList) {
 
   this.id = data.id;
   this.FileName = data.FileName;
-  this.Title = data.Title;
-  this.Description = data.Description;
+  
+  this.Title = ((data.Title == null) ? '' : data.Title);
+  this.Description = ((data.Description == null) ? '' : data.Description);
+  
+  this.width = data.ImageWidth;
+  this.height = data.ImageHeight;
 
   if (data.Keywords == '') data.Keywords = [];
   
@@ -15,7 +19,7 @@ var Photo = function(data, tagList) {
       _destroy: ko.observable(false) 
     }
   }));
-  
+    
   this.keywordList = ko.computed(function() {
     return $.map(self.tags(), function(tag) {
       if (!tag._destroy()) return tag.tag.constructedKeyword();
@@ -52,14 +56,14 @@ var Photo = function(data, tagList) {
   
   this.enteredKeyword = ko.observable(''); // keyword typed in to be saved
     
-      
-  this.isLandscape = ko.computed(function() {
-    if (self.width > self.height) return true;
-    else return false;
+  this.orientation = ko.computed(function() {
+    if (parseInt(self.width) > parseInt(self.height)) return 'landscape';
+    else return 'portrait';
   });
   
   /* Estimate the number of lines needed to view all of the content */
   this.descriptionLines = ko.computed(function() {
+    
     return parseInt((self.Description.length / 60) * 3);
   });
   
@@ -116,6 +120,19 @@ var Photo = function(data, tagList) {
   this.toJSON = function() {
     return ko.toJSON({id: self.id, FileName: self.FileName, Title: self.Title, Description: self.Description, Keywords: self.Keywords()});
   };
+  
+  this.pushToServer = function() {
+    var data = self.toJSON();
+    $.ajax({
+      type: "PUT",
+      url: "/photo_api/slim/photos",
+      data: data,
+      success: function(returnedData) {
+        console.log("saved " + self.FileName + " to server");
+      }
+    });
+
+  }
   
   // this.editables.Keywords.subscribe(function(change) {
     // change.forEach(function(keywordChange) {
@@ -260,9 +277,9 @@ var ViewModel = function() {
   this.tagList = new TagList(); // List of all tags for all photos
 	
   var offset = 0;
-  var limit = 20;
+  var limit = 24;
    
-  var numPages = 300;
+  var numPages = 30;
   
   (function getMoreData(offset,page) {
     if (page <= numPages) {
@@ -281,6 +298,7 @@ var ViewModel = function() {
       });
     }
   })(offset, 1);
+  
   
   /* return a list of plain text keywords */
   this.keywordList = ko.computed(function() {
@@ -331,13 +349,14 @@ var ViewModel = function() {
     self.selectedPhoto().saveChanges(self.tagList);
     
     var data = self.selectedPhoto().toJSON();
-    console.log(data);
+    //console.log(data);
     $.ajax({
       type: "PUT",
       url: "/photo_api/slim/photos",
       data: data,
       success: function(returnedData) {
         self.appStatus('');
+        console.log(returnedData);
       }
     });
   }
