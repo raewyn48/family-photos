@@ -4,6 +4,16 @@ html, body {
 
 .thumbnails {
   text-align: justify;
+  max-width: 1300px;
+  margin: 0 5%;
+}
+
+
+/* This is to avoid a 5 column grid */
+@media (max-width:1650px) {
+    .thumbnails {
+        max-width: 900px;
+    }
 }
 
 .thumbnails::after {
@@ -12,7 +22,7 @@ html, body {
   display: inline-block;
 }
 
-.thumbnail-wrapper {
+.thumbnail-wrapper, .thumbnail-empty {
   width: 210px;
   text-align: center;
   vertical-align: top;

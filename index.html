@@ -22,13 +22,21 @@
   </div>
 </div>
 <div class="w3-rest">
-  <div class="thumbnails" data-bind="foreach: filteredPhotos()">
-  <div class="thumbnail-wrapper">
-      <div data-bind="css: orientation" class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity">
-        <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage }" src="" alt="" class="">
-        <div data-bind="text: FileName" class="w3-small w3-center"></div>
-      </div>
-  </div>
+  <div class="thumbnails">
+    <!-- ko foreach: filteredPhotos() -->
+    <div class="thumbnail-wrapper">
+        <div data-bind="css: orientation" class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin w3-hover-opacity">
+          <img data-bind="click: $parent.selectPhoto, attr: {src: thumbnailImage }" src="" alt="" class="">
+          <div data-bind="text: FileName" class="w3-small w3-center"></div>
+        </div>
+    </div>
+    <!-- /ko -->
+    <div class="thumbnail-empty"></div>
+    <div class="thumbnail-empty"></div>
+    <div class="thumbnail-empty"></div>
+    <div class="thumbnail-empty"></div>
+    <div class="thumbnail-empty"></div>
+    <div class="thumbnail-empty"></div>
   </div>
   
   <div id="photo-modal" data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
