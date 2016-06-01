@@ -299,10 +299,10 @@ var ViewModel = function() {
   this.tagList = new TagList(); // List of all tags for all photos
 	
   var offset = 0;
-  var limit = 24;
+  var limit = 5;
    
   var allPages = true;
-  var numPages = 2;
+  var numPages = 1;
   
   /* Recursive function for fetching several pages in chunks */
   (function getMoreData(offset,page) {
@@ -350,7 +350,7 @@ var ViewModel = function() {
   }
   
   this.filteredPhotos = function() {    
-    if (self.filterBy() == null) return self.photoList;
+    if (self.filterBy() == null) return self.photoList();
     else {
       var filterKeyword = self.filterBy().constructedKeyword();
       return ko.utils.arrayFilter(self.photoList(), function(eachPhoto) {
@@ -362,12 +362,12 @@ var ViewModel = function() {
 
   this.page = ko.computed(function() {
     var photoList = self.filteredPhotos();
-    return photoList().slice((self.currentPage() -1) * self.pageBreak, self.currentPage() * self.pageBreak );
+    return photoList.slice((self.currentPage() -1) * self.pageBreak, self.currentPage() * self.pageBreak );
   });
   
   this.pages = ko.computed(function() {
     photos = self.filteredPhotos();
-    numPhotos = photos().length;
+    numPhotos = photos.length;
     var plus = 0;
     if ((numPhotos - Math.floor(numPhotos / self.pageBreak) * self.pageBreak) > 0) plus = 1;
     var pageArray = new Array(Math.floor(numPhotos / self.pageBreak) + plus);
