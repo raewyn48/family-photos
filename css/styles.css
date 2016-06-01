@@ -29,6 +29,10 @@ html, body {
   display: inline-block;
 }
 
+.thumbnail-wrapper {
+  height: 210px;
+}
+
 .thumbnail {
   display: inline-block;
 }

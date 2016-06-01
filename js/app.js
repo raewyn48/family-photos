@@ -49,12 +49,31 @@ var Photo = function(data, tagList) {
     return keywordArray;
   }
   
-  this.thumbnailImage = ko.observable(data.ThumbnailImage);
   this.photoURL = ko.observable('/photo_api/photos/' + data.FileName);
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
   
   this.enteredKeyword = ko.observable(''); // keyword typed in to be saved
+  
+  this.ThumbnailImage = ko.observable();
+  this.thumbnailLoaded = ko.observable(false);
+  
+  this.fetchedThumbnail = ko.computed(function() {
+    // fetch this from the API if it's not already saved
+    if (this.thumbnailLoaded()) {
+      return true;
+    }
+    else {
+      $.getJSON("/photo_api/slim/photos/thumbnail/" + self.id, function(data) {
+        if (data) {
+          self.ThumbnailImage(data.ThumbnailImage);
+          self.thumbnailLoaded(true);
+          return true;
+        }
+      });
+    }
+  }, self, {deferEvaluation: true});
+
     
   this.orientation = ko.computed(function() {
     if (parseInt(self.width) > parseInt(self.height)) return 'landscape';
@@ -273,16 +292,21 @@ var ViewModel = function() {
   this.enteredKeyword = ko.observable(''); // text input for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
   this.selectedPhoto = ko.observable(null); // photo showing in full view
+  this.pageBreak = 24;
+  this.currentPage = ko.observable(1);
+  this.totalPages = ko.observable(0);
   
   this.tagList = new TagList(); // List of all tags for all photos
 	
   var offset = 0;
   var limit = 24;
    
-  var numPages = 30;
+  var allPages = true;
+  var numPages = 2;
   
+  /* Recursive function for fetching several pages in chunks */
   (function getMoreData(offset,page) {
-    if (page <= numPages) {
+    if (allPages || (page <= numPages)) {
       $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=" + limit, function(data) {
         if (data) {
           var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
@@ -325,7 +349,7 @@ var ViewModel = function() {
     self.selectedPhoto(whichPhoto);
   }
   
-  this.filteredPhotos = ko.computed(function() {
+  this.filteredPhotos = function() {    
     if (self.filterBy() == null) return self.photoList;
     else {
       var filterKeyword = self.filterBy().constructedKeyword();
@@ -334,8 +358,34 @@ var ViewModel = function() {
 	      return (keywords.indexOf(filterKeyword) >= 0); 
       });
     }
-  });
+  };
 
+  this.page = ko.computed(function() {
+    var photoList = self.filteredPhotos();
+    return photoList().slice((self.currentPage() -1) * self.pageBreak, self.currentPage() * self.pageBreak );
+  });
+  
+  this.pages = ko.computed(function() {
+    photos = self.filteredPhotos();
+    numPhotos = photos().length;
+    var plus = 0;
+    if ((numPhotos - Math.floor(numPhotos / self.pageBreak) * self.pageBreak) > 0) plus = 1;
+    var pageArray = new Array(Math.floor(numPhotos / self.pageBreak) + plus);
+    self.totalPages(pageArray.length);
+    return $.map(pageArray, function(elem, index) { return {pageNum: index+1} });
+    
+ 
+  });
+  
+  this.thumbnailsLoaded = ko.computed(function() {
+    var thisPage = self.page();
+    var allLoaded = thisPage.every(function(photo) {
+      return photo.thumbnailLoaded();
+    });
+    return allLoaded;
+  });
+  
+  
   this.closePhoto = function() {
     self.selectedPhoto(null);
   }
@@ -371,14 +421,18 @@ var ViewModel = function() {
     self.selectedPhoto(null);
   }  
   
-  // this.filterThumbnails = function() {
-    // keyword = self.filterBy();
-    // self.photoList().forEach(function(photo) {
-      // photo.showThumbnail(photo.Keywords().indexOf(keyword) >= 0);
-    // });
-  // }
+  this.nextPage = function() {
+    self.currentPage(self.currentPage()+1);
+  }
+    
+  this.previousPage = function() {
+    self.currentPage(self.currentPage()-1);
+  }
   
-  
+  this.changePage = function(page) {
+    self.currentPage(page.pageNum);
+  }
+    
 };
 
 ko.applyBindings(new ViewModel());
