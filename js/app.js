@@ -55,24 +55,25 @@ var Photo = function(data, tagList) {
   
   this.enteredKeyword = ko.observable(''); // keyword typed in to be saved
   
-  this.ThumbnailImage = ko.observable();
   this.thumbnailLoaded = ko.observable(false);
   
-  this.fetchedThumbnail = ko.computed(function() {
+  this.thumbnail = ko.computed(function() {
     // fetch this from the API if it's not already saved
     if (this.thumbnailLoaded()) {
-      return true;
+      return self.ThumbnailImage();
     }
     else {
       $.getJSON("/photo_api/slim/photos/thumbnail/" + self.id, function(data) {
         if (data) {
-          self.ThumbnailImage(data.ThumbnailImage);
           self.thumbnailLoaded(true);
-          return true;
+          console.log('loaded ' + self.id);
+          self.ThumbnailImage = ko.observable(data.ThumbnailImage);
+          return self.ThumbnailImage();
         }
       });
     }
-  }, self, {deferEvaluation: true});
+  }, this, {deferEvaluation: true});
+  
 
     
   this.orientation = ko.computed(function() {
@@ -293,7 +294,8 @@ var ViewModel = function() {
   this.dataLoaded = ko.observable(false); // true when all photos loaded
   this.selectedPhoto = ko.observable(null); // photo showing in full view
   this.pageBreak = 24;
-  this.currentPage = ko.observable(1);
+  this.showPage = ko.observable(1);
+  this.loadPage = ko.observable(1);
   this.totalPages = ko.observable(0);
   
   this.photoCount = ko.observable(0);
@@ -373,26 +375,25 @@ var ViewModel = function() {
       });
     }
   };
-
-  this.page = ko.computed(function() {
+  
+  this.page = function(pageNum) {
     var photoList = self.filteredPhotos();
-    return photoList.slice((self.currentPage() -1) * self.pageBreak, self.currentPage() * self.pageBreak );
+    return photoList.slice((pageNum -1) * self.pageBreak, pageNum * self.pageBreak );
+  };
+  
+  /* return a list of photos to display for the current page */
+  this.showPhotos = ko.computed(function() {
+    return self.page(self.showPage());
+  });
+
+  /* return a list of photos that need to have thumbnails loaded */
+  this.loadingPhotos = ko.computed(function() {
+    return self.page(self.loadPage());
   });
   
-  this.pages = ko.computed(function() {
-    var plus = 0;
-    if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
-    var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
-    self.totalPages(pageArray.length);
-    return $.map(pageArray, function(elem, index) { return {pageNum: index+1} });
-    
- 
-  });
-  
-  /* Return true if all thumbnails for current page have been loaded */
+  /* return true if all thumbnails for loadPage have been loaded */
   this.thumbnailsLoaded = ko.computed(function() {
-    // Need to wait until the page is complete first
-    var thisPage = self.page();
+    var thisPage = self.loadingPhotos();
     if (!thisPage.length) return false;
     var allLoaded = thisPage.every(function(photo) {
       return photo.thumbnailLoaded();
@@ -400,6 +401,22 @@ var ViewModel = function() {
     return allLoaded;
     
   });
+  
+  this.switchPage = ko.computed(function() {
+    if (self.thumbnailsLoaded()) {
+      self.showPage(self.loadPage());
+    }
+  });
+  
+  /* return an array of page numbers for pagination */
+  this.pages = ko.computed(function() {
+    var plus = 0;
+    if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
+    var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
+    self.totalPages(pageArray.length);
+    return $.map(pageArray, function(elem, index) { return {pageNum: index+1} });
+  });
+  
   
   
   this.closePhoto = function() {
@@ -425,29 +442,37 @@ var ViewModel = function() {
         console.log(returnedData);
       }
     });
-  }
+  };
   
   this.saveAndClose = function() {
     self.savePhoto();
     self.closePhoto();
-  }
+  };
   
   this.cancel = function() {
     self.selectedPhoto().cancel();
     self.selectedPhoto(null);
-  }  
+  };
   
   this.nextPage = function() {
-    self.currentPage(self.currentPage()+1);
-  }
+    self.loadPage(self.showPage()+1);
+  };
     
   this.previousPage = function() {
-    self.currentPage(self.currentPage() - 1);
-  }
+    self.loadPage(self.showPage() - 1);
+  };
   
   this.changePage = function(page) {
-    self.currentPage(page.pageNum);
-  }
+    self.loadPage(page.pageNum);
+  };
+  
+  this.loadPage.subscribe(function(value) {
+    self.loadingPhotos().forEach(function(photo) {
+      // manually subscribe to force load
+      photo.thumbnail.subscribe(function(value) {
+      });
+    });
+  });
     
 };
 
