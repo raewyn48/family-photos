@@ -22,7 +22,9 @@
   </div>
 </div>
 <div class="w3-rest">
-  <div class="thumbnails" data-bind="visible: $root.thumbnailsLoaded">
+
+  <!-- Grid of thumbnails -->
+  <div class="thumbnails" data-bind="visible: $root.thumbnailsLoaded" style="display: none">
     <!-- ko foreach: page -->
     <div class="thumbnail-wrapper">
         <div data-bind="css: orientation" class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin-top w3-hover-opacity">
@@ -31,23 +33,35 @@
         </div>
     </div>
     <!-- /ko -->
+    
+    <!-- placeholders for last row of thumbnails to left align -->
     <div class="thumbnail-empty"></div>
     <div class="thumbnail-empty"></div>
     <div class="thumbnail-empty"></div>
     <div class="thumbnail-empty"></div>
     <div class="thumbnail-empty"></div>
     <div class="thumbnail-empty"></div>
+    
+    
+    <!-- pagination controls -->
     <div class="pagination w3-center">
       <ul class="w3-pagination w3-xlarge">
-        <li data-bind="if: currentPage() > 1"><a href="#" data-bind="click: previousPage">&laquo;</a></li>
+      
+        <li><a href="#" data-bind="click: (currentPage() > 1) && previousPage, css: {disabled: currentPage() == 1}">&laquo;</a></li>
+
+        
         <!-- ko foreach: pages() -->
         <li><a data-bind="text: pageNum, css: {'w3-green': pageNum == $root.currentPage()}, click: $root.changePage" href="#"></a></li>
         <!-- /ko -->
-        <li data-bind="if: currentPage() < totalPages()"><a href="#" data-bind="click: nextPage">&raquo;</a></li>
+        
+        <li><a href="#" data-bind="click: (currentPage() < totalPages()) && nextPage, css: {disabled: currentPage() == totalPages()}">&raquo;</a></li>
+
       </ul>
     </div>
   </div>
   
+  
+  <!-- open photo modal view -->
   <div id="photo-modal" data-bind="style: { display: photoSelected() ? 'block' : 'none' }" class="w3-modal">
     <div data-bind="with: selectedPhoto" class="w3-modal-content w3-animate-zoom w3-row" style="background: none; width: 100%; height: 100%;">
  

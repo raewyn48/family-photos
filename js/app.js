@@ -286,7 +286,7 @@ var TagList = function() {
 var ViewModel = function() {
   var self = this;
    
-  this.photoList = ko.observableArray([]);
+  this.photoList = ko.observableArray([]).extend({ rateLimit: 500 });
   this.appStatus = ko.observable('');
   this.filterBy = ko.observable(null);  // keyword used for filtering
   this.enteredKeyword = ko.observable(''); // text input for filtering
@@ -295,6 +295,20 @@ var ViewModel = function() {
   this.pageBreak = 24;
   this.currentPage = ko.observable(1);
   this.totalPages = ko.observable(0);
+  
+  this.photoCount = ko.observable(0);
+  
+  $.getJSON("/photo_api/slim/photos/count", function(data) {
+    if (data) {
+      if (data.count) {
+        self.photoCount(data.count);
+      }
+      else {
+        console.log(data);
+      }
+    }
+  });
+
   
   this.tagList = new TagList(); // List of all tags for all photos
 	
@@ -366,23 +380,25 @@ var ViewModel = function() {
   });
   
   this.pages = ko.computed(function() {
-    photos = self.filteredPhotos();
-    numPhotos = photos.length;
     var plus = 0;
-    if ((numPhotos - Math.floor(numPhotos / self.pageBreak) * self.pageBreak) > 0) plus = 1;
-    var pageArray = new Array(Math.floor(numPhotos / self.pageBreak) + plus);
+    if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
+    var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
     self.totalPages(pageArray.length);
     return $.map(pageArray, function(elem, index) { return {pageNum: index+1} });
     
  
   });
   
+  /* Return true if all thumbnails for current page have been loaded */
   this.thumbnailsLoaded = ko.computed(function() {
+    // Need to wait until the page is complete first
     var thisPage = self.page();
+    if (!thisPage.length) return false;
     var allLoaded = thisPage.every(function(photo) {
       return photo.thumbnailLoaded();
     });
     return allLoaded;
+    
   });
   
   
@@ -426,7 +442,7 @@ var ViewModel = function() {
   }
     
   this.previousPage = function() {
-    self.currentPage(self.currentPage()-1);
+    self.currentPage(self.currentPage() - 1);
   }
   
   this.changePage = function(page) {
@@ -435,4 +451,5 @@ var ViewModel = function() {
     
 };
 
+ko.options.deferUpdates = true;
 ko.applyBindings(new ViewModel());

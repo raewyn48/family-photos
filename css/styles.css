@@ -8,6 +8,15 @@ html, body {
   margin: 0 5%;
 }
 
+.pagination li a.disabled {
+    color: #ccc;
+    cursor:default;
+}
+
+.pagination li a.disabled:hover {
+    background: #fff;
+}
+
 
 /* This is to avoid a 5 column grid */
 @media (max-width:1650px) {
