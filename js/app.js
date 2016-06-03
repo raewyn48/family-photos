@@ -66,7 +66,6 @@ var Photo = function(data, tagList) {
       $.getJSON("/photo_api/slim/photos/thumbnail/" + self.id, function(data) {
         if (data) {
           self.thumbnailLoaded(true);
-          console.log('loaded ' + self.id);
           self.ThumbnailImage = ko.observable(data.ThumbnailImage);
           return self.ThumbnailImage();
         }
@@ -398,6 +397,7 @@ var ViewModel = function() {
     var allLoaded = thisPage.every(function(photo) {
       return photo.thumbnailLoaded();
     });
+    if (allLoaded) self.appStatus('');
     return allLoaded;
     
   });
@@ -411,12 +411,32 @@ var ViewModel = function() {
   /* return an array of page numbers for pagination */
   this.pages = ko.computed(function() {
     var plus = 0;
+    var showHowMany = 3;
+    self.showPage();    // Force a subscription 
     if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
     var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
     self.totalPages(pageArray.length);
-    return $.map(pageArray, function(elem, index) { return {pageNum: index+1} });
-  });
-  
+    pages = $.map(pageArray, function(elem, index) { 
+      pageNum = index+1;
+      return {
+        pageNum: pageNum,
+        inPageRange: ko.computed(function() {
+          if (pageNum == 1) return true;
+          if (pageNum == pageArray.length) return true;
+          if (self.showPage() < (1+showHowMany/2)) {
+            return pageNum <= (showHowMany+1);
+          }
+          else if ((pageArray.length - self.showPage()) < showHowMany/2) {
+            return pageNum >= (pageArray.length - showHowMany);
+          }
+          else {
+            return (pageNum < (self.showPage() + showHowMany/2)) && (pageNum > (self.showPage() - showHowMany/2));
+          }
+        }),
+      }
+    });
+    return pages;
+  });  
   
   
   this.closePhoto = function() {
@@ -467,6 +487,7 @@ var ViewModel = function() {
   };
   
   this.loadPage.subscribe(function(value) {
+    self.appStatus('loading-thumbnails');
     self.loadingPhotos().forEach(function(photo) {
       // manually subscribe to force load
       photo.thumbnail.subscribe(function(value) {

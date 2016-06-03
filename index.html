@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
    <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body data-bind="css: { saving: appStatus() == 'saving' } " class="">
+<body data-bind="css: appStatus ">
 <div class="w3-row-padding">
 <div class="controls w3-col" style="width: 200px">
   <div data-bind="if: true" class="w3-small">
@@ -51,7 +51,7 @@
 
         
         <!-- ko foreach: pages() -->
-        <li><a data-bind="text: pageNum, css: {'w3-green': pageNum == $root.showPage()}, click: $root.changePage" href="#"></a></li>
+        <li data-bind="if: inPageRange"><a data-bind="text: pageNum, css: {'w3-green': pageNum == $root.showPage()}, click: $root.changePage" href="#"></a></li>
         <!-- /ko -->
         
         <li><a href="#" data-bind="click: (showPage() < totalPages()) && nextPage, css: {disabled: showPage() == totalPages()}">&raquo;</a></li>

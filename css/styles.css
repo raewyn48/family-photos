@@ -17,6 +17,12 @@ html, body {
     background: #fff;
 }
 
+.pagination li.first::after, .pagination li.last::before {
+    content: '...';
+    float: left;
+    padding: 8px 0;
+}
+
 
 /* This is to avoid a 5 column grid */
 @media (max-width:1650px) {
@@ -82,6 +88,16 @@ textarea#description {
 body.saving {
   cursor: wait !important;
 }
+
+body.loading-thumbnails .pagination li a {
+  cursor: wait !important;
+}
+
+body.loading-thumbnails {
+  cursor: wait !important;
+}
+
+
 
 span.keyword {
   position: relative;
