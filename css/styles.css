@@ -4,8 +4,9 @@ html, body {
 
 .thumbnails {
   text-align: justify;
-  max-width: 1300px;
+  max-width: 1500px;
   margin: 0 5%;
+  margin-left: 200px;     // same as width of controls
 }
 
 .pagination li a.disabled {
@@ -27,7 +28,7 @@ li.missing {
 /* This is to avoid a 5 column grid */
 @media (max-width:1650px) {
     .thumbnails {
-        max-width: 900px;
+        max-width: 1100px;
     }
 }
 
@@ -122,6 +123,10 @@ div.controls {
     height: 100vh;
     overflow-x: visible;
     overflow-y: scroll;
+    width: 200px;         /* Same as margin for thumbnails */
+    position: fixed;
+    left: 0;
+    top: 0;
 }
 
 .controls li {
