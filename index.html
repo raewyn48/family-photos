@@ -52,6 +52,7 @@
         
         <!-- ko foreach: pages() -->
         <li data-bind="if: inPageRange"><a data-bind="text: pageNum, css: {'w3-green': pageNum == $root.showPage()}, click: $root.changePage" href="#"></a></li>
+        <li data-bind="ifnot: inPageRange" class="missing">&hellip;</li>
         <!-- /ko -->
         
         <li><a href="#" data-bind="click: (showPage() < totalPages()) && nextPage, css: {disabled: showPage() == totalPages()}">&raquo;</a></li>

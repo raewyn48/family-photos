@@ -17,12 +17,12 @@ html, body {
     background: #fff;
 }
 
-.pagination li.first::after, .pagination li.last::before {
-    content: '...';
+li.missing {
     float: left;
     padding: 8px 0;
+    font-size: 10px;
+    line-height: 500%;
 }
-
 
 /* This is to avoid a 5 column grid */
 @media (max-width:1650px) {
