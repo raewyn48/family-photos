@@ -359,13 +359,14 @@ var ViewModel = function() {
   });
 
   
-  
+  /* Set a keyword filter for displaying photos */
   this.setFilter = function(tag) {
     if (self.filterBy() != null) {
       self.filterBy().selected(false);
     }
     self.filterBy(tag);
     tag.selected(true);
+    self.showPage(1);
   };
     
   this.selectPhoto = function(whichPhoto) {
@@ -377,10 +378,12 @@ var ViewModel = function() {
     if (self.filterBy() == null) return self.photoList();
     else {
       var filterKeyword = self.filterBy().constructedKeyword();
-      return ko.utils.arrayFilter(self.photoList(), function(eachPhoto) {
+      var filteredPhotos = ko.utils.arrayFilter(self.photoList(), function(eachPhoto) {
         var keywords = eachPhoto.keywordList();
 	      return (keywords.indexOf(filterKeyword) >= 0); 
       });
+      self.photoCount(filteredPhotos.length);
+      return filteredPhotos;
     }
   };
   

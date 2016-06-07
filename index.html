@@ -44,7 +44,7 @@
     
     
     <!-- pagination controls -->
-    <div class="pagination w3-center">
+    <div data-bind="visible: pages().length>1" class="pagination w3-center">
       <ul class="w3-pagination w3-xlarge">
       
         <li><a href="#" data-bind="click: (showPage() > 1) && previousPage, css: {disabled: showPage() == 1}">&laquo;</a></li>
