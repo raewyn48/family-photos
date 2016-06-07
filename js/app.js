@@ -101,22 +101,27 @@ var Photo = function(data, tagList) {
     
     self.editData.Title.subscribe(function() {
       self.dataChanged(true);
-      console.log(self.dataChanged());
     });
     
     self.editData.Description.subscribe(function() {
       self.dataChanged(true);
-       console.log(self.dataChanged());
-   });
+    });
+   
+    self.editData.Keywords.subscribe(function() {
+      self.dataChanged(true);
+    });
+
   };
   
   
   this.cancel = function() {
     self.editData = null;
+    self.dataChanged(false);
   };
   
   this.removeKeyword = function(keyword) {
     keyword._destroy(true);
+    self.dataChanged(true);
   };
   
   this.keywordEntered = function(d,e) {
