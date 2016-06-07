@@ -9,6 +9,8 @@ var Photo = function(data, tagList) {
   
   this.width = data.ImageWidth;
   this.height = data.ImageHeight;
+  
+  this.dataChanged = ko.observable(false);
 
   if (data.Keywords == '') data.Keywords = [];
   
@@ -92,11 +94,22 @@ var Photo = function(data, tagList) {
   
   this.copyToEdit = function() {
     self.editData = {
-      Title: self.Title,
-      Description: self.Description,
+      Title: ko.observable(self.Title),
+      Description: ko.observable(self.Description),
       Keywords: ko.observableArray(self.copyKeywords())
     };
+    
+    self.editData.Title.subscribe(function() {
+      self.dataChanged(true);
+      console.log(self.dataChanged());
+    });
+    
+    self.editData.Description.subscribe(function() {
+      self.dataChanged(true);
+       console.log(self.dataChanged());
+   });
   };
+  
   
   this.cancel = function() {
     self.editData = null;
@@ -123,8 +136,8 @@ var Photo = function(data, tagList) {
 
     
   this.saveChanges = function(tagList) {
-    self.Title = self.editData.Title;
-    self.Description = self.editData.Description;
+    self.Title = self.editData.Title();
+    self.Description = self.editData.Description();
     self.editData.Keywords().forEach(function(keyword, index) {
       if (keyword._add) {
         self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: ko.observable(false)});
@@ -134,6 +147,7 @@ var Photo = function(data, tagList) {
         tagList.removeTag(keyword.keyword());
       }      
     });
+    self.dataChanged(false);
   }
     
   this.toJSON = function() {
@@ -508,6 +522,7 @@ var ViewModel = function() {
       });
     });
   });
+  
     
 };
 
