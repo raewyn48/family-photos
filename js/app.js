@@ -313,13 +313,23 @@ var ViewModel = function() {
   
   this.tagList = new TagList(); // List of all tags for all photos
 	
+  /* Load all photo data */
+  $.getJSON("/photo_api/slim/photos", function(data) {
+    if (data) {
+      var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
+      self.photoList.push.apply(self.photoList, fetchedPhotos);
+      self.dataLoaded(true);
+    }
+  });
+
+  
+  /* Recursive function for fetching several pages in chunks */
+  /*
   var offset = 0;
-  var limit = 5;
+  var limit = 100;
    
   var allPages = true;
   var numPages = 1;
-  
-  /* Recursive function for fetching several pages in chunks */
   (function getMoreData(offset,page) {
     if (allPages || (page <= numPages)) {
       $.getJSON("/photo_api/slim/photos?offset=" + offset + "&limit=" + limit, function(data) {
@@ -331,13 +341,12 @@ var ViewModel = function() {
           getMoreData(offset, page+1);
         }
         else {
-          /* Data is all loaded */
           self.dataLoaded(true);
         }
       });
     }
   })(offset, 1);
-  
+  */
   
   /* return a list of plain text keywords */
   this.keywordList = ko.computed(function() {
@@ -405,6 +414,7 @@ var ViewModel = function() {
   this.switchPage = ko.computed(function() {
     if (self.thumbnailsLoaded()) {
       self.showPage(self.loadPage());
+      $('html, body').scrollTop(0);
     }
   });
   
@@ -486,10 +496,11 @@ var ViewModel = function() {
     self.loadPage(page.pageNum);
   };
   
+  /* when the loadPage changes - a new page of thumbnails to be loaded */
   this.loadPage.subscribe(function(value) {
     self.appStatus('loading-thumbnails');
     self.loadingPhotos().forEach(function(photo) {
-      // manually subscribe to force load
+      /* manually subscribe to force load so we only load the thumbnails needed*/
       photo.thumbnail.subscribe(function(value) {
       });
     });
