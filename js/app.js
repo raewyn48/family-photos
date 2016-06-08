@@ -305,12 +305,12 @@ var TagList = function() {
 var ViewModel = function() {
   var self = this;
    
-  this.photoList = ko.observableArray([]).extend({ rateLimit: 500 });
+  this.photoList = ko.observableArray([]);
   this.appStatus = ko.observable('');
   this.filterBy = ko.observable(null);  // keyword used for filtering
   this.enteredKeyword = ko.observable(''); // text input for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
-  this.selectedPhoto = ko.observable(null); // photo showing in full view
+  this.selectedPhotoIndex = ko.observable(null);
   this.pageBreak = 36;
   this.showPage = ko.observable(1);
   this.loadPage = ko.observable(1);
@@ -387,11 +387,12 @@ var ViewModel = function() {
     tag.selected(true);
     self.showPage(1);
   };
-    
-  this.selectPhoto = function(whichPhoto) {
-    whichPhoto.copyToEdit();
-    self.selectedPhoto(whichPhoto);
-  }
+  
+  this.photoCount = function() {
+    return self.photoList().length;
+  };
+
+
   
   this.filteredPhotos = function() {    
     if (self.filterBy() == null) return self.photoList();
@@ -405,13 +406,14 @@ var ViewModel = function() {
       return filteredPhotos;
     }
   };
-  
+
+  /* return an array of photos for a particular page */
   this.page = function(pageNum) {
     var photoList = self.filteredPhotos();
     return photoList.slice((pageNum -1) * self.pageBreak, pageNum * self.pageBreak );
-  };
-  
-  /* return a list of photos to display for the current page */
+  };  
+
+  /* return the photos to display for the current page */
   this.showPhotos = ko.computed(function() {
     return self.page(self.showPage());
   });
@@ -432,6 +434,58 @@ var ViewModel = function() {
     return allLoaded;
     
   });
+  
+  /* return which photo showing in full view for editing */
+  this.selectedPhoto = ko.computed(function() {
+     if (self.selectedPhotoIndex() != null) {
+      if (self.thumbnailsLoaded()) {
+        return self.showPhotos()[self.selectedPhotoIndex()];
+      }
+      else {
+        return self.loadingPhotos()[self.selectedPhotoIndex()];
+      }
+    }
+  }); 
+
+  /* set photo for full view / editing */
+  this.selectPhoto = function(index) {
+    if (index >= 0) {
+      self.selectedPhotoIndex(index);
+      self.selectedPhoto().copyToEdit();
+    }
+    console.log(self.selectedPhotoIndex());
+  };
+  
+  /* select the next photo on the page to view */
+  this.next = function() {
+    var newIndex = self.selectedPhotoIndex()+1;
+    /* If going on to next page, change the page */
+    if (newIndex >= self.pageBreak) {
+      self.nextPage();
+      newIndex=0;
+    }
+    self.selectPhoto(newIndex);
+    
+  };
+  
+  /* select the previous photo on the page to view */
+  this.previous = function() {
+    var newIndex = self.selectedPhotoIndex()-1;
+    /* If going on to previous page, change the page */
+    if (newIndex < 0) {
+      self.previousPage();
+      newIndex=self.pageBreak-1;
+    }
+    self.selectPhoto(newIndex);
+  };
+  
+  this.firstPhoto = function() {
+    return false;
+  };
+  
+  this.lastPhoto = function() {
+    return false;
+  };
   
   this.switchPage = ko.computed(function() {
     if (self.thumbnailsLoaded()) {
@@ -472,11 +526,11 @@ var ViewModel = function() {
   
   
   this.closePhoto = function() {
-    self.selectedPhoto(null);
+    self.selectedPhotoIndex(null);
   }
   
   this.photoSelected = function() {
-    return self.selectedPhoto() != null;
+    return self.selectedPhotoIndex() != null;
   }
   
   this.savePhoto = function() {
@@ -505,7 +559,9 @@ var ViewModel = function() {
     self.selectedPhoto().cancel();
     self.selectedPhoto(null);
   };
-  
+
+
+    
   this.nextPage = function() {
     self.loadPage(self.showPage()+1);
   };
@@ -527,6 +583,7 @@ var ViewModel = function() {
       });
     });
   });
+  
   
     
 };
