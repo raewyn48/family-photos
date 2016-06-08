@@ -388,11 +388,6 @@ var ViewModel = function() {
     self.showPage(1);
   };
   
-  this.photoCount = function() {
-    return self.photoList().length;
-  };
-
-
   
   this.filteredPhotos = function() {    
     if (self.filterBy() == null) return self.photoList();
@@ -453,7 +448,6 @@ var ViewModel = function() {
       self.selectedPhotoIndex(index);
       self.selectedPhoto().copyToEdit();
     }
-    console.log(self.selectedPhotoIndex());
   };
   
   /* select the next photo on the page to view */
@@ -480,11 +474,14 @@ var ViewModel = function() {
   };
   
   this.firstPhoto = function() {
-    return false;
+    return ((self.selectedPhotoIndex() == 0) && (self.showPage() == 1));
   };
   
   this.lastPhoto = function() {
-    return false;
+    var photosOnPage = self.showPhotos().length;
+    console.log(photosOnPage, self.selectedPhotoIndex());
+    console.log(self.showPage(), self.totalPages());
+    return (((self.selectedPhotoIndex()+1) == photosOnPage) && (self.showPage() == self.totalPages()));
   };
   
   this.switchPage = ko.computed(function() {
@@ -499,8 +496,10 @@ var ViewModel = function() {
     var plus = 0;
     var showHowMany = 3;
     self.showPage();    // Force a subscription 
+    self.filterBy();
     if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
     var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
+    console.log(self.photoCount());
     self.totalPages(pageArray.length);
     pages = $.map(pageArray, function(elem, index) { 
       pageNum = index+1;
