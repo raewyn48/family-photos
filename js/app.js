@@ -186,6 +186,8 @@ var Tag = function(keyword) {
     this.keyword = ko.observable(keyword);
   }
   
+  // this.tagGroup is set by TagGroup when tag added to group //
+  
   this.count = ko.observable(1);
   
   this.keywordWithCount = ko.computed(function() {
@@ -214,7 +216,6 @@ var Tag = function(keyword) {
     return (self.constructedKeyword() == keyword);
   }
   
-
 };
 
 var TagGroup = function(tag) {
@@ -227,21 +228,19 @@ var TagGroup = function(tag) {
   }
   this.tags = ko.observableArray([tag]);
   this.expanded = ko.observable(false);
+  tag.tagGroup = this;
   
   this.addTag = function(tag) {
     self.tags.push(tag);
     self.tags.sort(function (left, right) { return left.keyword() == right.keyword() ? 0 : (left.keyword().toLowerCase() < right.keyword().toLowerCase() ? -1 : 1) });
+    tag.tagGroup = self;
   };
   
   this.groupDisplay = ko.computed(function() {
     if (!self.groupName()) return 'Keywords';
     else return self.groupName();
   });
-    
-  this.logTags = ko.computed(function() {
-    //console.log(ko.toJS(self.tags()));
-  });
-  
+      
   this.toggleExpand = function() {
     self.expanded(!self.expanded());
   };
@@ -326,6 +325,11 @@ var ViewModel = function() {
       var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
       self.photoList.push.apply(self.photoList, fetchedPhotos);
       self.dataLoaded(true);
+      
+      // trigger load of initial state
+      var hash = location.hash;
+      location.hash = '';
+      location.hash = hash;
     }
   });
 
@@ -368,12 +372,7 @@ var ViewModel = function() {
   
   /* Set a keyword filter for displaying photos */
   this.setFilter = function(tag) {
-    if (self.filterBy() != null) {
-      self.filterBy().selected(false);
-    }
-    self.filterBy(tag);
-    tag.selected(true);
-    self.showPage(1);
+    location.hash = tag.constructedKeyword();
   };
   
   
@@ -509,8 +508,7 @@ var ViewModel = function() {
     });
     return pages;
   });  
-  
-  
+   
   this.closePhoto = function() {
     self.selectedPhotoIndex(null);
   }
@@ -545,9 +543,7 @@ var ViewModel = function() {
     self.selectedPhoto().cancel();
     self.selectedPhoto(null);
   };
-
-
-    
+  
   this.nextPage = function() {
     self.loadPage(self.showPage()+1);
   };
@@ -563,6 +559,7 @@ var ViewModel = function() {
   /* when the loadPage changes - a new page of thumbnails to be loaded */
   this.loadPage.subscribe(function(value) {
     self.appStatus('loading-thumbnails');
+    console.log(self.loadingPhotos().length);
     self.loadingPhotos().forEach(function(photo) {
       /* manually subscribe to force load so we only load the thumbnails needed*/
       photo.thumbnail.subscribe(function(value) {
@@ -571,6 +568,38 @@ var ViewModel = function() {
   });
   
   
+  // Client-side routes
+  Sammy(function() {
+          
+    this.get('#:keyword', function() {
+      if (self.dataLoaded()) {
+        var keyword = this.params.keyword;
+        var tags = self.tagList.tags();
+        var tag = tags.find(function(element) {
+          return element.constructedKeyword() == keyword;
+        });
+        
+        if (self.filterBy() != null) {
+          self.filterBy().selected(false);
+        }
+        self.filterBy(tag);
+        tag.selected(true);
+        tag.tagGroup.expanded(true);
+        
+        self.showPage(1);
+      }
+    });
+    
+    this.get('', function() {
+      if (self.dataLoaded()) {
+        if (self.filterBy() != null) {
+          self.filterBy().selected(false);
+        }
+        self.filterBy(null);
+      }
+    });
+
+  }).run();
     
 };
 
