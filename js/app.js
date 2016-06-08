@@ -88,9 +88,6 @@ var Photo = function(data, tagList) {
     return parseInt((self.Description.length / 60) * 3);
   });
   
-  // this.backUp = function() {
-    // self.backUp = {id: self.id(), FileName: self.FileName(), Title: self.Title(), Description: self.Description(), Keywords: self.Keywords()};
-  // };
   
   this.copyToEdit = function() {
     self.editData = {
@@ -172,15 +169,6 @@ var Photo = function(data, tagList) {
 
   }
   
-  // this.editables.Keywords.subscribe(function(change) {
-    // change.forEach(function(keywordChange) {
-      // if (keywordChange.status == 'deleted') {
-        // // Need some link between this photo's keywords and the main keyword/tag list
-      // }
-    // });
-    // console.log(change[0].status, change[0].index, change[0].value);
-  // }, null, "arrayChange");
-  
 };
 
 var Tag = function(keyword) {
@@ -246,7 +234,7 @@ var TagGroup = function(tag) {
   };
   
   this.groupDisplay = ko.computed(function() {
-    if (!self.groupName()) return 'Tags';
+    if (!self.groupName()) return 'Keywords';
     else return self.groupName();
   });
     
@@ -473,14 +461,14 @@ var ViewModel = function() {
     self.selectPhoto(newIndex);
   };
   
+  /* Is this the first photo in the set? */
   this.firstPhoto = function() {
     return ((self.selectedPhotoIndex() == 0) && (self.showPage() == 1));
   };
   
+  /* Is this the last photo in the set? */
   this.lastPhoto = function() {
     var photosOnPage = self.showPhotos().length;
-    console.log(photosOnPage, self.selectedPhotoIndex());
-    console.log(self.showPage(), self.totalPages());
     return (((self.selectedPhotoIndex()+1) == photosOnPage) && (self.showPage() == self.totalPages()));
   };
   
@@ -499,7 +487,6 @@ var ViewModel = function() {
     self.filterBy();
     if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
     var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
-    console.log(self.photoCount());
     self.totalPages(pageArray.length);
     pages = $.map(pageArray, function(elem, index) { 
       pageNum = index+1;
