@@ -218,7 +218,7 @@ var Tag = function(keyword) {
   }
   
   this.hash = ko.computed(function() {
-    return '#' + encodeURIComponent	(self.constructedKeyword());
+    return '#' + safeHash(self.constructedKeyword());
   });
   
 };
@@ -335,9 +335,6 @@ var ViewModel = function() {
       
       // trigger load of initial state
       routes.refresh();
-      // var hash = location.hash;
-      // location.hash = '';
-      // location.hash = hash;
     }
   });
 
@@ -379,9 +376,9 @@ var ViewModel = function() {
 
   
   /* Set a keyword filter for displaying photos */
-  this.setFilter = function(tag) {
-    location.hash = tag.constructedKeyword();
-  };  
+  // this.setFilter = function(tag) {
+    // location.hash = tag.constructedKeyword();
+  // };  
   
   this.filteredPhotos = function() {    
     if (self.filterBy() == null) return self.photoList();
@@ -554,7 +551,7 @@ var ViewModel = function() {
 
   this.changePage = function(page) {
     if (self.filterBy() != null) {
-      location.hash = self.filterBy().consructedKeyword + '/' + page.pageNum;
+      location.hash = safeHash(self.constructedKeyword()) + '/' + page.pageNum;
     }
     else {
       location.hash = '/' + page.pageNum;
@@ -587,10 +584,42 @@ var ViewModel = function() {
   
   this.hash = ko.computed(function() {
     if (self.filterBy()) {
-      return '#' + self.filterBy().constructedKeyword();
+      return self.filterBy().hash();
     }
     else return '#';
   });
+  
+  this.previousHash = ko.computed(function() {
+    if (self.showPage() > 1) {
+      return self.hash() + '/' + (self.showPage()-1);
+    }
+    else {
+      return '#';
+    }
+  });
+  
+  this.nextHash = ko.computed(function() {
+    if (self.showPage() < self.totalPages()) {
+      return self.hash() + '/' + (self.showPage()+1);
+    }
+    else {
+      return '#';
+    }
+  });
+
+  this.cancelPrevPage = function() {
+    if (self.showPage() <= 1) {
+      return false;
+    }
+    return true;
+  };
+
+  this.cancelNextPage = function() {
+    if (self.showPage() >= self.totalPages()) {
+      return false;
+    }
+    return true;
+  };
   
   // Client-side routes
   var routes = Sammy(function() {
@@ -598,6 +627,7 @@ var ViewModel = function() {
        
     this.get('#:keyword', function() {
       var keyword = this.params.keyword;
+      console.log(keyword);
       if (keyword != self.filterBy()) {
         if (self.dataLoaded()) {
           var tags = self.tagList.tags();
