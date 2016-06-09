@@ -158,6 +158,7 @@ var Photo = function(data, tagList) {
   
   this.pushToServer = function() {
     var data = self.toJSON();
+    console.log(data);
     $.ajax({
       type: "PUT",
       url: "/photo_api/slim/photos",
@@ -217,7 +218,7 @@ var Tag = function(keyword) {
   }
   
   this.hash = ko.computed(function() {
-    return '#' + encodeURIComponent(self.constructedKeyword());
+    return '#' + encodeURIComponent	(self.constructedKeyword());
   });
   
 };
@@ -526,9 +527,9 @@ var ViewModel = function() {
   
   this.savePhoto = function() {
     self.appStatus('saving');
-    self.selectedPhoto().saveChanges(self.tagList);
-    
-    var data = self.selectedPhoto().toJSON();
+    var selectedPhoto = self.selectedPhoto();
+    selectedPhoto.saveChanges(self.tagList);
+    var data = selectedPhoto.toJSON();
     //console.log(data);
     $.ajax({
       type: "PUT",
