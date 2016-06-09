@@ -91,16 +91,6 @@ body.saving {
   cursor: wait !important;
 }
 
-body.loading-thumbnails .pagination li a {
-  cursor: wait !important;
-}
-
-body.loading-thumbnails {
-  cursor: wait !important;
-}
-
-
-
 span.keyword {
   position: relative;
   margin-right: 12px !important;

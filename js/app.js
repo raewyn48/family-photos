@@ -216,6 +216,10 @@ var Tag = function(keyword) {
     return (self.constructedKeyword() == keyword);
   }
   
+  this.hash = ko.computed(function() {
+    return '#' + encodeURIComponent(self.constructedKeyword());
+  });
+  
 };
 
 var TagGroup = function(tag) {
@@ -325,11 +329,14 @@ var ViewModel = function() {
       var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
       self.photoList.push.apply(self.photoList, fetchedPhotos);
       self.dataLoaded(true);
+
+      console.log('data loaded');
       
       // trigger load of initial state
-      var hash = location.hash;
-      location.hash = '';
-      location.hash = hash;
+      routes.refresh();
+      // var hash = location.hash;
+      // location.hash = '';
+      // location.hash = hash;
     }
   });
 
@@ -373,8 +380,7 @@ var ViewModel = function() {
   /* Set a keyword filter for displaying photos */
   this.setFilter = function(tag) {
     location.hash = tag.constructedKeyword();
-  };
-  
+  };  
   
   this.filteredPhotos = function() {    
     if (self.filterBy() == null) return self.photoList();
@@ -471,6 +477,7 @@ var ViewModel = function() {
     return (((self.selectedPhotoIndex()+1) == photosOnPage) && (self.showPage() == self.totalPages()));
   };
   
+  /* show the loaded page of thumbnails */
   this.switchPage = ko.computed(function() {
     if (self.thumbnailsLoaded()) {
       self.showPage(self.loadPage());
@@ -500,7 +507,7 @@ var ViewModel = function() {
           else if ((pageArray.length - self.showPage()) < showHowMany/2) {
             return pageNum >= (pageArray.length - showHowMany);
           }
-          else {
+          else {            
             return (pageNum < (self.showPage() + showHowMany/2)) && (pageNum > (self.showPage() - showHowMany/2));
           }
         }),
@@ -543,53 +550,84 @@ var ViewModel = function() {
     self.selectedPhoto().cancel();
     self.selectedPhoto(null);
   };
+
+  this.changePage = function(page) {
+    if (self.filterBy() != null) {
+      location.hash = self.filterBy().consructedKeyword + '/' + page.pageNum;
+    }
+    else {
+      location.hash = '/' + page.pageNum;
+    }
+  };
   
   this.nextPage = function() {
-    self.loadPage(self.showPage()+1);
+    self.changePage({pageNum: self.showPage() + 1});
   };
     
   this.previousPage = function() {
-    self.loadPage(self.showPage() - 1);
+    self.changePage({pageNum: self.showPage() - 1});
   };
   
-  this.changePage = function(page) {
-    self.loadPage(page.pageNum);
-  };
   
   /* when the loadPage changes - a new page of thumbnails to be loaded */
   this.loadPage.subscribe(function(value) {
-    self.appStatus('loading-thumbnails');
-    console.log(self.loadingPhotos().length);
-    self.loadingPhotos().forEach(function(photo) {
-      /* manually subscribe to force load so we only load the thumbnails needed*/
-      photo.thumbnail.subscribe(function(value) {
+    if (self.dataLoaded()) {
+      console.log('loadPage changed',value);
+      self.appStatus('loading-thumbnails');
+      self.loadingPhotos().forEach(function(photo) {
+        /* manually subscribe to force load so we only load the thumbnails needed*/
+        photo.thumbnail.subscribe(function(value) {
+        });
       });
-    });
+    }
   });
   
+  this.loadPage.extend({ notify: 'always' });
+  
+  this.hash = ko.computed(function() {
+    if (self.filterBy()) {
+      return '#' + self.filterBy().constructedKeyword();
+    }
+    else return '#';
+  });
   
   // Client-side routes
-  Sammy(function() {
-          
+  var routes = Sammy(function() {
+
+       
     this.get('#:keyword', function() {
-      if (self.dataLoaded()) {
-        var keyword = this.params.keyword;
-        var tags = self.tagList.tags();
-        var tag = tags.find(function(element) {
-          return element.constructedKeyword() == keyword;
-        });
-        
-        if (self.filterBy() != null) {
-          self.filterBy().selected(false);
+      var keyword = this.params.keyword;
+      if (keyword != self.filterBy()) {
+        if (self.dataLoaded()) {
+          var tags = self.tagList.tags();
+          var tag = tags.find(function(element) {
+            return element.constructedKeyword() == keyword;
+          });
+          
+          if (tag) {
+            if (self.filterBy() != null) {
+              self.filterBy().selected(false);
+            }
+            self.filterBy(tag);
+            tag.selected(true);
+            tag.tagGroup.expanded(true);          
+          }
+          self.showPage(1);
         }
-        self.filterBy(tag);
-        tag.selected(true);
-        tag.tagGroup.expanded(true);
-        
-        self.showPage(1);
       }
     });
     
+    this.get('#/:page', function() {
+      this.app.runRoute('get','');
+      self.loadPage(parseInt(this.params.page));
+    });
+
+
+    this.get('#:keyword/:page', function() {
+      this.app.runRoute('get','#' + this.params.keyword);
+      self.loadPage(parseInt(this.params.page));
+    });
+      
     this.get('', function() {
       if (self.dataLoaded()) {
         if (self.filterBy() != null) {

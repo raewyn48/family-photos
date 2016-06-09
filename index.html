@@ -23,7 +23,7 @@
       <li class="group" data-bind="text: groupDisplay, css: {expanded: expanded}, click: toggleExpand"></li>
       <div data-bind="visible: expanded">
         <ul data-bind="foreach: tags" class="tags">
-          <li class="tag" data-bind="css: {selected: selected}"><a href="#" data-bind="text: keywordWithCount, click: $root.setFilter" class="keyword"></a></li>
+          <li class="tag" data-bind="css: {selected: selected}"><a href="#" data-bind="text: keywordWithCount, attr: {href: hash}" class="keyword"></a></li>
         </ul>
       </div>
     </ul>
@@ -59,8 +59,12 @@
 
         
         <!-- ko foreach: pages() -->
-        <li data-bind="if: inPageRange"><a data-bind="text: pageNum, css: {'w3-green': pageNum == $root.showPage()}, click: $root.changePage" href="#"></a></li>
-        <li data-bind="ifnot: inPageRange" class="missing">&hellip;</li>
+          <!-- ko if: inPageRange -->
+          <li ><a data-bind="text: pageNum, css: {'w3-green': pageNum == $root.showPage()}, attr: {href: $parent.hash() + '/' + pageNum }" href="#"></a></li>
+          <!-- /ko -->
+          <!-- ko ifnot: inPageRange -->
+          <li data-bind="ifnot: inPageRange" class="missing">&hellip;</li>
+          <!-- /ko -->
         <!-- /ko -->
         
         <li><a href="#" data-bind="click: (showPage() < totalPages()) && nextPage, css: {disabled: showPage() == totalPages()}">&raquo;</a></li>
