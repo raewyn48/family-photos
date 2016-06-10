@@ -52,7 +52,7 @@
     
     
     <!-- pagination controls -->
-    <div data-bind="visible: pages().length>1" class="pagination w3-center">
+    <div data-bind="visible: thumbnailsLoaded() && pages().length>1" class="pagination w3-center">
       <ul class="w3-pagination w3-xlarge">
       
         <li><a href="#" data-bind="attr: { href: previousHash }, click: cancelPrevPage, css: {disabled: showPage() == 1}">&laquo;</a></li>

@@ -315,7 +315,7 @@ var ViewModel = function() {
   var self = this;
    
   this.photoList = ko.observableArray([]);
-  this.appStatus = ko.observable('');
+  this.appStatus = ko.observable('loading-thumbnails');
   this.filterBy = ko.observable(null);  // keyword used for filtering
   this.enteredKeyword = ko.observable(''); // text input for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
@@ -588,7 +588,6 @@ var ViewModel = function() {
   /* when the loadPage changes - a new page of thumbnails to be loaded */
   this.loadPage.subscribe(function(value) {
     if (self.dataLoaded()) {
-      console.log('loadPage changed',value);
       self.appStatus('loading-thumbnails');
       self.loadingPhotos().forEach(function(photo) {
         /* manually subscribe to force load so we only load the thumbnails needed*/
