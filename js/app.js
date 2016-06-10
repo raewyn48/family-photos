@@ -214,7 +214,7 @@ var Tag = function(keyword) {
   };
   
   this.match = function(keyword) {
-    return (self.constructedKeyword() == keyword);
+    return (self.constructedKeyword().toLowerCase() == keyword.toLowerCase());
   }
   
   this.hash = ko.computed(function() {
@@ -260,6 +260,18 @@ var TagList = function() {
   
   this.addTag = function(keyword) {
     if (existing = ko.utils.arrayFirst(self.tags(), function(item) { return item.match(keyword)}) ) {
+      var split = keyword.split(':');
+      if (split.length > 1) {
+        keyword = split[1];
+      }
+      
+      /* Use the one with the most caps for the main tag label */
+      var capsNew = keyword.match(/[A-Z]/g) || [];
+      var capsOld = existing.keyword().match(/[A-Z]/g) || [];
+      if (capsNew.length > capsOld.length) {
+        existing.keyword(keyword);
+      }
+      
       existing.increment();
       return existing;
     }
