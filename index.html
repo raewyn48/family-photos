@@ -103,7 +103,7 @@
         </p>
         <p>
             <label for="keywords" class="w3-label">Keywords</label>
-            <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: keywordEntered}" type="text" class="w3-input w3-black">
+            <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: keywordEntered, blur: addKeyword}" type="text" class="w3-input w3-black">
             <div data-bind="foreach: editData.Keywords" class="w3-container w3-padding-tiny">
               <span data-bind="text: keyword, click: $parent.removeKeyword" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round w3-hover-red"></span>
             </div>	

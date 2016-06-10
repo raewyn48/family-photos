@@ -121,17 +121,22 @@ var Photo = function(data, tagList) {
     self.dataChanged(true);
   };
   
-  this.keywordEntered = function(d,e) {
-    /* If enter key pressed */
-    if (e.keyCode === 13) {
+  this.addKeyword = function() {
+    if (this.enteredKeyword()) {
       self.editData.Keywords.push({
         keyword: ko.observable(this.enteredKeyword()), 
         _destroy: ko.observable(false),
         _add: true
       });
       self.enteredKeyword(null);
-
-
+    }
+  }
+  
+  /* add keyword when enter press is detected */
+  this.keywordEntered = function(d,e) {
+    /* If enter key pressed */
+    if (e.keyCode === 13) {
+      self.addKeyword();
     }
     return true;
   };
