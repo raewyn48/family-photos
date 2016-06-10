@@ -523,7 +523,7 @@ var ViewModel = function() {
           else if ((pageArray.length - self.showPage()) < showHowMany/2) {
             return pageNum >= (pageArray.length - showHowMany);
           }
-          else {            
+          else { 
             return (pageNum < (self.showPage() + showHowMany/2)) && (pageNum > (self.showPage() - showHowMany/2));
           }
         }),
@@ -531,6 +531,10 @@ var ViewModel = function() {
     });
     return pages;
   });  
+  
+  this.showPagination = ko.computed(function() {
+    return self.thumbnailsLoaded() && (self.totalPages()>1);
+  });
    
   this.closePhoto = function() {
     self.selectedPhotoIndex(null);
