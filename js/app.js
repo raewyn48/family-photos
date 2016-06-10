@@ -437,7 +437,8 @@ var ViewModel = function() {
   this.selectPhoto = function(index) {
     if (index >= 0) {
       self.selectedPhotoIndex(index);
-      self.selectedPhoto().copyToEdit();
+      var selectedPhoto = self.selectedPhoto();
+      selectedPhoto.copyToEdit();
     }
   };
   
