@@ -102,9 +102,18 @@
             <textarea id="description" type="text" data-bind="textInput: editData.Description, style: { height: descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
         </p>
         <p>
-            <label for="keywords" class="w3-label">Keywords</label>
-            <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: keywordEntered, blur: addKeyword}" type="text" class="w3-input w3-black">
-            <div data-bind="foreach: editData.Keywords" class="w3-container w3-padding-tiny">
+            <label for="keywords" class="w3-label">Tags</label>
+            <div class="w3-row">
+              <div class="w3-third">
+                <select id="keyword-group" type="text" class="w3-select w3-black w3-border-0" data-bind="options: $root.groupList, optionsText: 'groupDisplay', value: groupSelected">
+                </select>
+              </div>
+              <div class="w3-rest w3-margin-left">
+                <input id="keywords" data-bind="textInput: enteredKeyword, event: {keypress: keywordEntered, blur: addKeyword}" type="text" class="w3-input w3-black">
+              </div>
+            </div>
+            
+            <div data-bind="foreach: editData.Keywords" class="w3-container w3-padding-tiny w3-margin-top">
               <span data-bind="text: keyword, click: $parent.removeKeyword" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round w3-hover-red"></span>
             </div>	
         </p>

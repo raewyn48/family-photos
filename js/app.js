@@ -56,8 +56,10 @@ var Photo = function(data, tagList) {
   this.height = data.ImageHeight;
   
   this.enteredKeyword = ko.observable(''); // keyword typed in to be saved
+  this.groupSelected = ko.observable(null); // group selected in tag entry
   
   this.thumbnailLoaded = ko.observable(false);
+    
   
   this.thumbnail = ko.computed(function() {
     // fetch this from the API if it's not already saved
@@ -122,9 +124,14 @@ var Photo = function(data, tagList) {
   };
   
   this.addKeyword = function() {
+    var group = self.groupSelected();
+    var groupDisplay = '';
+    if (group.groupName()) {
+      groupDisplay = group.groupName() + ':';
+    }
     if (this.enteredKeyword()) {
       self.editData.Keywords.push({
-        keyword: ko.observable(this.enteredKeyword()), 
+        keyword: ko.observable(groupDisplay + this.enteredKeyword()), 
         _destroy: ko.observable(false),
         _add: true
       });
@@ -247,7 +254,7 @@ var TagGroup = function(tag) {
   };
   
   this.groupDisplay = ko.computed(function() {
-    if (!self.groupName()) return 'Keywords';
+    if (!self.groupName()) return 'Keyword';
     else return self.groupName();
   });
       
@@ -455,7 +462,12 @@ var ViewModel = function() {
     if (index >= 0) {
       self.selectedPhotoIndex(index);
       var selectedPhoto = self.selectedPhoto();
-      selectedPhoto.copyToEdit();
+      if (selectedPhoto) {
+        selectedPhoto.copyToEdit();
+      }
+      else {
+        console.log("Oops, there is no selected photo", index);
+      }
     }
   };
   
