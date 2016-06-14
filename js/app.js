@@ -470,6 +470,19 @@ var ViewModel = function() {
     }
   }); 
 
+  /* set photo for full view / editing */
+  this.selectPhoto = function(index) {
+    if (index >= 0) {
+      self.selectedPhotoIndex(index);
+      var selectedPhoto = self.selectedPhoto();
+      if (selectedPhoto) {
+        selectedPhoto.copyToEdit();
+      }
+      else {
+        console.log("Oops, there is no selected photo", index);
+      }
+    }
+  };
   
   /* select the next photo on the page to view */
   this.next = function() {
@@ -479,32 +492,19 @@ var ViewModel = function() {
       self.nextPage();
       newIndex=0;
     }
-    //self.selectPhoto(newIndex);
-    location.hash = self.pageHash + '/' + newIndex;
+    self.selectPhoto(newIndex);
+    
   };
   
   /* select the previous photo on the page to view */
-  // this.previous = function() {
-    // var newIndex = self.selectedPhotoIndex()-1;
-    // /* If going on to previous page, change the page */
-    // if (newIndex < 0) {
-      // self.previousPage();
-      // newIndex=self.pageBreak-1;
-    // }
-    // //self.selectPhoto(newIndex);
-    // location.hash = self.pageHash + '/' + newIndex;
-  // };
-
-  this.previousHash = function() {
+  this.previous = function() {
     var newIndex = self.selectedPhotoIndex()-1;
     /* If going on to previous page, change the page */
     if (newIndex < 0) {
+      self.previousPage();
       newIndex=self.pageBreak-1;
-      return self.previousPageHash() + '/' + newIndex;
     }
-    else {
-      return self.pageHash() + '/' + newIndex;
-    }
+    self.selectPhoto(newIndex);
   };
   
   /* Is this the first photo in the set? */
@@ -563,7 +563,6 @@ var ViewModel = function() {
    
   this.closePhoto = function() {
     self.selectedPhotoIndex(null);
-    location.hash = self.pageHash();
   }
   
   this.photoSelected = function() {
@@ -611,13 +610,13 @@ var ViewModel = function() {
     }
   };
   
-  // this.nextPage = function() {
-    // self.changePage({pageNum: self.showPage() + 1});
-  // };
+  this.nextPage = function() {
+    self.changePage({pageNum: self.showPage() + 1});
+  };
     
-  // this.previousPage = function() {
-    // self.changePage({pageNum: self.showPage() - 1});
-  // };
+  this.previousPage = function() {
+    self.changePage({pageNum: self.showPage() - 1});
+  };
   
   
   /* when the loadPage changes - a new page of thumbnails to be loaded */
@@ -641,16 +640,7 @@ var ViewModel = function() {
     else return '#';
   });
   
-  this.pageHash = function() {
-      return self.hash() + '/' + self.showPage();
-  };
-  
-  /* set photo for full view / editing */
-  this.photoHash = function(index) {
-    return self.pageHash() + '/' + index;
-  };
-  
-  this.previousPageHash = ko.computed(function() {
+  this.previousHash = ko.computed(function() {
     if (self.showPage() > 1) {
       return self.hash() + '/' + (self.showPage()-1);
     }
@@ -659,7 +649,7 @@ var ViewModel = function() {
     }
   });
   
-  this.nextPageHash = ko.computed(function() {
+  this.nextHash = ko.computed(function() {
     if (self.showPage() < self.totalPages()) {
       return self.hash() + '/' + (self.showPage()+1);
     }
@@ -718,21 +708,7 @@ var ViewModel = function() {
       this.app.runRoute('get','#' + this.params.keyword);
       self.loadPage(parseInt(this.params.page));
     });
-
-    this.get('#:keyword/:page/:photoIndex', function() {
-      this.app.runRoute('get','#' + this.params.keyword + '/' + this.params.page);
-      if (this.params.photoIndex >= 0) {
-        self.selectedPhotoIndex(this.params.photoIndex);
-        var selectedPhoto = self.selectedPhoto();
-        if (selectedPhoto) {
-          selectedPhoto.copyToEdit();
-        }
-        else {
-          console.log("Oops, there is no selected photo", index);
-        }
-      }
-    });
-    
+      
     this.get('', function() {
       if (self.dataLoaded()) {
         if (self.filterBy() != null) {
