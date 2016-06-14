@@ -82,9 +82,10 @@
  
  
       <div id="photo-view">
-        <a data-bind="visible: !$parent.firstPhoto(), click: $parent.previous" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;left:5%">&#10094;</a>
-        <a data-bind="visible: !$parent.lastPhoto(), click: $parent.next" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;right:5%">&#10095;</a>
-
+        <!-- ko if: !dataChanged() -->
+          <a data-bind="visible: !$parent.firstPhoto(), click: $parent.previous" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;left:5%">&#10094;</a>
+          <a data-bind="visible: !$parent.lastPhoto(), click: $parent.next" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;right:5%">&#10095;</a>
+        <!-- /ko -->
         <img data-bind="attr: {src: photoURL}, css: orientation" src="" alt="" class="w3-card-24">
       </div>
     
@@ -95,11 +96,11 @@
         </p>
         <p>
             <label for="title" class="w3-label">Title</label>
-            <input id="title" data-bind="textInput: editData.Title" type="text" class="w3-input w3-black">
+            <input id="title" data-bind="textInput: editData().Title" type="text" class="w3-input w3-black">
         </p>
         <p>
             <label class="w3-label" for="description">Description</label>
-            <textarea id="description" type="text" data-bind="textInput: editData.Description, style: { height: descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
+            <textarea id="description" type="text" data-bind="textInput: editData().Description, style: { height: descriptionLines() + 'em' }" class="w3-input w3-black"></textarea>
         </p>
         <p>
             <label for="keywords" class="w3-label">Tags</label>
@@ -113,12 +114,12 @@
               </div>
             </div>
             
-            <div data-bind="foreach: editData.Keywords" class="w3-container w3-padding-tiny w3-margin-top">
+            <div data-bind="foreach: editData().Keywords" class="w3-container w3-padding-tiny w3-margin-top">
               <span data-bind="text: keyword, click: $parent.removeKeyword" class="keyword w3-tag w3-teal w3-padding-small w3-margin-bottom w3-round w3-hover-red"></span>
             </div>	
         </p>
         <p data-bind="visible: dataChanged">
-          <button data-bind="click: $parent.saveAndClose" class="w3-btn w3-white w3-hover-teal">Save</button>
+          <button data-bind="click: $parent.save" class="w3-btn w3-white w3-hover-teal">Save</button>
           <button data-bind="click: $parent.cancel" class="w3-btn w3-white w3-hover-red">Cancel</button>
         </p>
       </div>

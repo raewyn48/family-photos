@@ -11,6 +11,7 @@ var Photo = function(data, tagList) {
   this.height = data.ImageHeight;
   
   this.dataChanged = ko.observable(false);
+  this.editData = ko.observable(null);
 
   if (data.Keywords == '') data.Keywords = [];
   
@@ -92,21 +93,21 @@ var Photo = function(data, tagList) {
   
   
   this.copyToEdit = function() {
-    self.editData = {
+    self.editData({
       Title: ko.observable(self.Title),
       Description: ko.observable(self.Description),
       Keywords: ko.observableArray(self.copyKeywords())
-    };
+    });
     
-    self.editData.Title.subscribe(function() {
+    self.editData().Title.subscribe(function() {
       self.dataChanged(true);
     });
     
-    self.editData.Description.subscribe(function() {
+    self.editData().Description.subscribe(function() {
       self.dataChanged(true);
     });
    
-    self.editData.Keywords.subscribe(function() {
+    self.editData().Keywords.subscribe(function() {
       self.dataChanged(true);
     });
 
@@ -114,7 +115,7 @@ var Photo = function(data, tagList) {
   
   
   this.cancel = function() {
-    self.editData = null;
+    self.copyToEdit();
     self.dataChanged(false);
   };
   
@@ -130,7 +131,7 @@ var Photo = function(data, tagList) {
       groupDisplay = group.groupName() + ':';
     }
     if (this.enteredKeyword()) {
-      self.editData.Keywords.push({
+      self.editData().Keywords.push({
         keyword: ko.observable(groupDisplay + this.enteredKeyword()), 
         _destroy: ko.observable(false),
         _add: true
@@ -150,9 +151,9 @@ var Photo = function(data, tagList) {
 
     
   this.saveChanges = function(tagList) {
-    self.Title = self.editData.Title();
-    self.Description = self.editData.Description();
-    self.editData.Keywords().forEach(function(keyword, index) {
+    self.Title = self.editData().Title();
+    self.Description = self.editData().Description();
+    self.editData().Keywords().forEach(function(keyword, index) {
       if (keyword._add) {
         self.tags.push({tag: tagList.addTag(keyword.keyword()), _destroy: ko.observable(false)});
       }
@@ -354,8 +355,6 @@ var ViewModel = function() {
       var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
       self.photoList.push.apply(self.photoList, fetchedPhotos);
       self.dataLoaded(true);
-
-      console.log('data loaded');
       
       // trigger load of initial state
       routes.refresh();
@@ -449,10 +448,24 @@ var ViewModel = function() {
   this.selectedPhoto = ko.computed(function() {
      if (self.selectedPhotoIndex() != null) {
       if (self.thumbnailsLoaded()) {
-        return self.showPhotos()[self.selectedPhotoIndex()];
+        var selected = self.showPhotos()[self.selectedPhotoIndex()];
+        console.log(selected);
+        if (!selected) {
+          console.log('Thumbnails loaded');
+          console.log(self.selectedPhotoIndex());
+          console.log(ko.toJS(self.showPhotos()));
+        }
+        return selected;
       }
       else {
-        return self.loadingPhotos()[self.selectedPhotoIndex()];
+        var selected = self.loadingPhotos()[self.selectedPhotoIndex()];
+        console.log(selected);
+        if (!selected) {
+          console.log('Thumbnails loaded');
+          console.log(self.selectedPhotoIndex());
+          console.log(ko.toJS(self.showPhotos()));
+        }
+        return selected;
       }
     }
   }); 
@@ -572,6 +585,10 @@ var ViewModel = function() {
       }
     });
   };
+
+  this.save = function() {
+    self.savePhoto();
+  }
   
   this.saveAndClose = function() {
     self.savePhoto();
@@ -580,7 +597,8 @@ var ViewModel = function() {
   
   this.cancel = function() {
     self.selectedPhoto().cancel();
-    self.selectedPhoto(null);
+    /* Don't close */
+//    self.selectedPhotoIndex(null);
   };
 
   this.changePage = function(page) {
@@ -660,7 +678,6 @@ var ViewModel = function() {
        
     this.get('#:keyword', function() {
       var keyword = this.params.keyword;
-      console.log(keyword);
       if (keyword != self.filterBy()) {
         if (self.dataLoaded()) {
           var tags = self.tagList.tags();
