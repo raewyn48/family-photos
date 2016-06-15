@@ -327,7 +327,8 @@ var ViewModel = function() {
   this.filterBy = ko.observable(null);  // keyword used for filtering
   this.enteredKeyword = ko.observable(''); // text input for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
-  this.selectedPhotoIndex = ko.observable(null);
+  this.selectedFileName = ko.observable('');
+  
   this.pageBreak = 36;
   this.showPage = ko.observable(1);
   this.loadPage = ko.observable(1);
@@ -444,45 +445,37 @@ var ViewModel = function() {
     
   });
   
-  /* return which photo showing in full view for editing */
-  this.selectedPhoto = ko.computed(function() {
-     if (self.selectedPhotoIndex() != null) {
+ 
+  /* set which photo showing in full view for editing */
+  this.selectedFileName.subscribe(function() {
+    self.selectedPhoto().copyToEdit();
+  });
+  
+  this.selectedPhotoIndex = ko.pureComputed({
+      read: function() {
+        if (self.selectedFileName()) {
+          if (self.thumbnailsLoaded()) {
+            var selectedIndex = self.showPhotos().findIndex(function(element) {
+              return element.FileName == self.selectedFileName();
+            });
+            return selectedIndex;
+          }
+        }
+        else return -1;
+      },
+      write: function(value) {
+      }
+  });
+  
+  this.selectedPhoto = ko.pureComputed(function() {
+    if (self.selectedPhotoIndex()>0) {
       if (self.thumbnailsLoaded()) {
         var selected = self.showPhotos()[self.selectedPhotoIndex()];
-        console.log(selected);
-        if (!selected) {
-          console.log('Thumbnails loaded');
-          console.log(self.selectedPhotoIndex());
-          console.log(ko.toJS(self.showPhotos()));
-        }
-        return selected;
-      }
-      else {
-        var selected = self.loadingPhotos()[self.selectedPhotoIndex()];
-        console.log(selected);
-        if (!selected) {
-          console.log('Thumbnails loaded');
-          console.log(self.selectedPhotoIndex());
-          console.log(ko.toJS(self.showPhotos()));
-        }
         return selected;
       }
     }
-  }); 
-
-  /* set photo for full view / editing */
-  this.selectPhoto = function(index) {
-    if (index >= 0) {
-      self.selectedPhotoIndex(index);
-      var selectedPhoto = self.selectedPhoto();
-      if (selectedPhoto) {
-        selectedPhoto.copyToEdit();
-      }
-      else {
-        console.log("Oops, there is no selected photo", index);
-      }
-    }
-  };
+    return null;
+  });
   
   /* select the next photo on the page to view */
   this.next = function() {
@@ -562,11 +555,11 @@ var ViewModel = function() {
   });
    
   this.closePhoto = function() {
-    self.selectedPhotoIndex(null);
+    self.selectedFileName(null);
   }
   
   this.photoSelected = function() {
-    return self.selectedPhotoIndex() != null;
+    return self.selectedFileName() != '';
   }
   
   this.savePhoto = function() {
@@ -640,6 +633,15 @@ var ViewModel = function() {
     else return '#';
   });
   
+  this.pageHash = function() {
+    return self.hash() + '/' + self.showPage();
+  }
+
+  this.photoHash = function(fileName) {
+      return self.pageHash() + '/' + safeHash(fileName);
+  };
+  
+  
   this.previousHash = ko.computed(function() {
     if (self.showPage() > 1) {
       return self.hash() + '/' + (self.showPage()-1);
@@ -708,7 +710,12 @@ var ViewModel = function() {
       this.app.runRoute('get','#' + this.params.keyword);
       self.loadPage(parseInt(this.params.page));
     });
-      
+
+    this.get('#:keyword/:page/:file', function() {
+      this.app.runRoute('get','#' + this.params.keyword + '/' + this.params.page);
+      self.selectedFileName(this.params.file);
+    });
+    
     this.get('', function() {
       if (self.dataLoaded()) {
         if (self.filterBy() != null) {
