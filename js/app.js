@@ -4,24 +4,29 @@ var Photo = function(data, tagList) {
   this.id = data.id;
   this.FileName = data.FileName;
   
-  this.Title = ((data.Title == null) ? '' : data.Title);
-  this.Description = ((data.Description == null) ? '' : data.Description);
-  
-  this.width = data.ImageWidth;
-  this.height = data.ImageHeight;
-  
   this.dataChanged = ko.observable(false);
-  this.editData = ko.observable(null);
-
-  if (data.Keywords == '') data.Keywords = [];
+  this.editData = ko.observable({});
   
-  /* an array of {Tag, _destroy} */
-  this.tags = ko.observableArray($.map(data.Keywords, function(keyword) {
-    return {
-      tag: tagList.addTag(keyword),
-      _destroy: ko.observable(false) 
-    }
-  }));
+  this.loadData = function(data) {
+    self.Title = ((data.Title == null) ? '' : data.Title);
+    self.Description = ((data.Description == null) ? '' : data.Description);
+    
+    self.width = data.ImageWidth;
+    self.height = data.ImageHeight;
+
+    if (data.Keywords == '') data.Keywords = [];
+
+    /* an array of {Tag, _destroy} */
+    this.tags = ko.observableArray($.map(data.Keywords, function(keyword) {
+      return {
+        tag: tagList.addTag(keyword),
+        _destroy: ko.observable(false) 
+      }
+    }));
+  };
+  
+  this.loadData(data);
+  this.ready = ko.observable(false);
     
   this.keywordList = ko.computed(function() {
     return $.map(self.tags(), function(tag) {
@@ -182,6 +187,20 @@ var Photo = function(data, tagList) {
     });
 
   }
+  
+  this.getData = function() {
+    self.ready(false);
+    $.getJSON("/photo_api/slim/photos/" + self.id, function(data) {
+      if (data) {
+        self.loadData(data);
+        self.ready(true);
+      }
+    });
+  };
+  
+  this.ready.subscribe(function() {
+    if (self.ready()) self.copyToEdit();
+  });
   
 };
 
@@ -351,7 +370,7 @@ var ViewModel = function() {
   this.tagList = new TagList(); // List of all tags for all photos
 	
   /* Load all photo data */
-  $.getJSON("/photo_api/slim/photos", function(data) {
+  $.getJSON("/photo_api/slim/photos?min=yes", function(data) {
     if (data) {
       var fetchedPhotos = $.map(data, function(photo) { return new Photo(photo, self.tagList) });
       self.photoList.push.apply(self.photoList, fetchedPhotos);
@@ -448,7 +467,7 @@ var ViewModel = function() {
  
   /* set which photo showing in full view for editing */
   this.selectedFileName.subscribe(function() {
-    self.selectedPhoto().copyToEdit();
+    self.selectedPhoto().getData();
   });
   
   this.selectedPhotoIndex = ko.pureComputed({
@@ -555,7 +574,8 @@ var ViewModel = function() {
   });
    
   this.closePhoto = function() {
-    self.selectedFileName(null);
+    self.selectedFileName('');
+    routes.setLocation('#Family:Smith/3');
   }
   
   this.photoSelected = function() {
