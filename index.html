@@ -83,8 +83,8 @@
  
       <div id="photo-view">
         <!-- ko if: !dataChanged() -->
-          <a data-bind="visible: !$parent.firstPhoto(), click: $parent.previous" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;left:5%">&#10094;</a>
-          <a data-bind="visible: !$parent.lastPhoto(), click: $parent.next" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;right:5%">&#10095;</a>
+          <a data-bind="attr: {href: $parent.previousPhotoHash()}, visible: !$parent.firstPhoto()" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;left:5%">&#10094;</a>
+          <a data-bind="attr: {href: $parent.nextPhotoHash()}, visible: !$parent.lastPhoto()" class="w3-btn-floating w3-black w3-hover-white" style="position:absolute;top:45%;right:5%">&#10095;</a>
         <!-- /ko -->
         <img data-bind="attr: {src: photoURL}, css: orientation" src="" alt="" class="w3-card-24">
       </div>

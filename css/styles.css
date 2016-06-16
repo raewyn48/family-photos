@@ -156,7 +156,7 @@ ul.tags {
 
 .loading-overlay {
   display: none;
-}
+}	
 
 .loading-thumbnails .loading-overlay {
   z-index:3;
@@ -178,3 +178,6 @@ ul.tags {
     left: 50%;
 }
 
+#photo-view a {
+  text-decoration: none;
+}
