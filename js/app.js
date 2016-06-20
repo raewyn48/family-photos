@@ -341,28 +341,31 @@ var TagList = function() {
 var ViewModel = function() {
   var self = this;
    
-  this.photoList = ko.observableArray([]);
+  this.photoList = ko.observableArray([]); // all the photos
   this.appStatus = ko.observable('loading-thumbnails');
-  this.filterKeyword = ko.observable('');
-  this.filterBy = ko.observable(null);  // keyword used for filtering
-  this.enteredKeyword = ko.observable(''); // text input for filtering
+  this.filterKeyword = ko.observable(null); // plain text keyword from hash
+  this.filterBy = ko.observable(null);  // tag object used for filtering
+  this.enteredKeyword = ko.observable(null); // text input for filtering
   this.dataLoaded = ko.observable(false); // true when all photos loaded
-  this.selectedFileName = ko.observable('');
+  this.selectedFileName = ko.observable(null); // filename from hash
   
   this.pageBreak = 36;
-  this.showPage = ko.observable(1);
-  this.loadPage = ko.observable(1);
+  //this.showPage = ko.observable(1);
+  
+  this.loadPage = ko.observable(null);
+  this.showPage = ko.computed(function() { return self.loadPage() });
+  
   this.totalPages = ko.observable(0);
   
-  this.photoCount = ko.observable(0);
+  this.totalCount = ko.observable(0);
   
   $.getJSON("/photo_api/slim/photos/count", function(data) {
     if (data) {
       if (data.count) {
-        self.photoCount(data.count);
+        self.totalCount(data.count);
       }
       else {
-        console.log(data);
+        console.log("Total photos " + data);
       }
     }
   });
@@ -426,10 +429,18 @@ var ViewModel = function() {
         var keywords = eachPhoto.keywordList();
 	      return (keywords.indexOf(filterKeyword) >= 0); 
       });
-      self.photoCount(filteredPhotos.length);
       return filteredPhotos;
     }
   };
+  
+  this.photoCount = ko.computed(function() {
+    if (self.filteredPhotos()) {
+      return self.filteredPhotos().length;
+    }
+    else {
+      return self.totalCount;
+    }
+  });
 
   /* return an array of photos for a particular page */
   this.page = function(pageNum) {
@@ -444,8 +455,9 @@ var ViewModel = function() {
 
   /* return the photos to display for the current page */
   this.showPhotos = ko.computed(function() {
+    console.log("showing page " + self.showPage());
     return self.page(self.showPage());
-  });
+  }); 
 
   /* return a list of photos that need to have thumbnails loaded */
   this.loadingPhotos = ko.computed(function() {
@@ -463,11 +475,15 @@ var ViewModel = function() {
     return allLoaded;
     
   });
-   
+     
   this.selectedPhotoIndex = ko.computed(function() {
-    console.log('computing index');
-    console.log(self.selectedFileName());
+    if (self.selectedFileName() == null) {
+      console.log("Filename hasn't been set yet. Just wait. Return null.");
+      return null;
+    }
     if (self.selectedFileName()) {
+      console.log('computing index');
+      console.log(self.selectedFileName());
       if (self.thumbnailsLoaded.peek()) {
         var selectedIndex = self.showPhotos().findIndex(function(element) {
          return (element.FileName == self.selectedFileName());
@@ -488,29 +504,45 @@ var ViewModel = function() {
         
       }
     }
-    else return -1;
-
+    else {
+      console.log('No filename. Returning index -1');
+      return -1;
+    }
   });
     
   this.selectedPhoto = ko.pureComputed(function() {
     // Look for the photo within the whole filter set
-    var selectedIndex = self.filteredPhotos().findIndex(function(photo) {
-      return photo.FileName == self.selectedFileName();
-    });
-    
-    if (selectedIndex >= 0) {
+    if (self.selectedFileName() == null) {
+      console.log("Filename hasn't been set yet. Just wait. Return null.");
+      return null;
+    }
+    if (self.selectedFileName()) {
+      console.log("selected file name is " + self.selectedFileName());
+      var selectedIndex = self.filteredPhotos().findIndex(function(photo) {
+        return photo.FileName == self.selectedFileName();
+      });
       
-      console.log("Found photo, has index " + selectedIndex);
-      page = self.findPage(selectedIndex);
-      console.log("It should be on page " + page);
-      self.loadPage(page);
-      photo = self.filteredPhotos()[selectedIndex];
-      photo.index = selectedIndex;
-      return photo;
+      if (selectedIndex >= 0) {
+        console.log("Found photo, has index " + selectedIndex);
+        page = self.findPage(selectedIndex);
+        console.log("It should be on page " + page);
+        self.loadPage(page);
+        photo = self.filteredPhotos()[selectedIndex];
+        photo.index = selectedIndex;
+        return photo;
+      }
+      else if (self.filterKeyword()) {
+        // Find photo and reset filter
+        console.log("Can't find photo in this filter. Reset filter.");
+        self.filterKeyword('');
+      }
+      else {
+        console.log("There is no filter so this photo musn't exist. Reset filename.");
+        self.selectedFileName('');
+      }  
     }
-    else {
-      // Find photo and reset filter
-    }
+    else console.log("No selected file.");
+
 
   });
   
@@ -540,35 +572,44 @@ var ViewModel = function() {
   };
 
   this.previousPhotoHash = function() {
-    var newFilterIndex = self.selectedPhoto().index-1;
-    if (newFilterIndex >= 0) {
-      var newPageIndex = self.selectedPhotoIndex()-1;
-      var newPhotoFile = self.filteredPhotos()[newFilterIndex].FileName;
-      var newPage = self.onPage();
-      /* If going on to previous page, change the page */
-      if (newPageIndex < 0) {
-        newPageIndex = self.pageBreak-1;
-        newPage--;
+    if (self.selectedPhoto()) {
+      var newFilterIndex = self.selectedPhoto().index-1;
+      if (newFilterIndex >= 0) {
+        var newPageIndex = self.selectedPhotoIndex()-1;
+        var newPhotoFile = self.filteredPhotos()[newFilterIndex].FileName;
+        var newPage = self.onPage();
+        /* If going on to previous page, change the page */
+        if (newPageIndex < 0) {
+          newPageIndex = self.pageBreak-1;
+          newPage--;
+        }
+        return self.hash() + '/' + newPage + '/' + safeHash(newPhotoFile);
       }
-      return self.hash() + '/' + newPage + '/' + safeHash(newPhotoFile);
+      else return '#';
     }
     else return '#';
   };
 
   this.nextPhotoHash = function() {
-    var newFilterIndex = self.selectedPhoto().index+1;
-    if (newFilterIndex <= self.filteredPhotos.length) {
-      var newPageIndex = self.selectedPhotoIndex()+1;
-      var newPhotoFile = self.filteredPhotos()[newFilterIndex].FileName;
-      var newPage = self.onPage();
-      /* If going on to next page, change the page */
-      if (newPageIndex >= self.pageBreak) {
-        newPageIndex=0;
-        newPage++;
+    if (self.selectedPhoto()) {
+      var newFilterIndex = self.selectedPhoto().index+1;
+      console.log("Index of selected is " + self.selectedPhoto().index, "new index " + newFilterIndex, "Length: " + self.filteredPhotos().length);
+      if (newFilterIndex < self.filteredPhotos().length) {
+        var newPageIndex = self.selectedPhotoIndex()+1;
+        var newPhotoFile = self.filteredPhotos()[newFilterIndex].FileName;
+        var newPage = self.onPage();
+        /* If going on to next page, change the page */
+        if (newPageIndex >= self.pageBreak) {
+          newPageIndex=0;
+          newPage++;
+        }
+        return self.hash() + '/' + newPage + '/' + safeHash(newPhotoFile);
       }
-      return self.hash() + '/' + newPage + '/' + safeHash(newPhotoFile);
+      else return '#';
     }
-    else return '#';
+    else {
+      return '#';
+    }
     
   };
   
@@ -584,12 +625,12 @@ var ViewModel = function() {
   };
   
   /* show the loaded page of thumbnails */
-  this.switchPage = ko.computed(function() {
-    if (self.thumbnailsLoaded()) {
-      self.showPage(self.loadPage());
-      $('html, body').scrollTop(0);
-    }
-  });
+  // this.switchPage = ko.computed(function() {
+    // if (self.thumbnailsLoaded()) {
+      // self.showPage(self.loadPage());
+      // $('html, body').scrollTop(0);
+    // }
+  // });
   
   /* return an array of page numbers for pagination */
   this.pages = ko.computed(function() {
@@ -597,6 +638,8 @@ var ViewModel = function() {
     var showHowMany = 3;
     self.showPage();    // Force a subscription 
     self.filterBy();
+    console.log('Making pagination: show page ' + self.showPage());
+    console.log('Making pagination: Number photos ' + self.photoCount());
     if ((self.photoCount() - Math.floor(self.photoCount() / self.pageBreak) * self.pageBreak) > 0) plus = 1;
     var pageArray = new Array(Math.floor(self.photoCount() / self.pageBreak) + plus);
     self.totalPages(pageArray.length);
@@ -631,6 +674,7 @@ var ViewModel = function() {
   }
   
   this.photoSelected = function() {
+    console.log("selected photo? " + (self.selectedFileName() != ''));
     return self.selectedFileName() != '';
   }
   
@@ -666,14 +710,14 @@ var ViewModel = function() {
 //    self.selectedPhotoIndex(null);
   };
 
-  this.changePage = function(page) {
-    if (self.filterBy() != null) {
-      location.hash = safeHash(self.constructedKeyword()) + '/' + page.pageNum;
-    }
-    else {
-      location.hash = '/' + page.pageNum;
-    }
-  };
+  // this.changePage = function(page) {
+    // if (self.filterBy() != null) {
+      // location.hash = safeHash(self.constructedKeyword()) + '/' + page.pageNum;
+    // }
+    // else {
+      // location.hash = '/' + page.pageNum;
+    // }
+  // };
   
   this.nextPage = function() {
     self.changePage({pageNum: self.showPage() + 1});
@@ -683,10 +727,12 @@ var ViewModel = function() {
     self.changePage({pageNum: self.showPage() - 1});
   };
   
-  this.onPage = function() {
-    if (self.thumbnailsLoaded.peek()) return self.showPage();
+  this.onPage = ko.computed(function() {
+    if (self.thumbnailsLoaded()) {
+      return self.showPage();
+    }
     else return self.loadPage();
-  }
+  });
   
   this.hash = ko.computed(function() {
     if (self.filterBy()) {
@@ -696,15 +742,25 @@ var ViewModel = function() {
   });
   
   this.pageHash = function() {
-    return self.hash() + '/' + self.onPage();
+    console.log("Making hash, on page: " + self.onPage());
+    if (self.onPage() > 1) {
+      return self.hash() + '/' + self.onPage();
+    }
+    else return self.hash();
   }
 
   this.photoHash = function(fileName) {
+    if (fileName) {
       return self.pageHash() + '/' + safeHash(fileName);
+    }
+    else return self.pageHash();
   };
   
   this.fullHash = function() {
+    if (self.selectedFileName()) {
       return self.pageHash() + '/' + safeHash(self.selectedFileName());
+    }
+    else return self.pageHash();
   }
   
   this.previousHash = ko.computed(function() {
@@ -743,11 +799,14 @@ var ViewModel = function() {
   
   /* What to do when filterKeyword is changed */
   this.filterKeyword.subscribe(function(keyword) {
-    if (self.dataLoaded()) {
+    console.log('Keyword changed to ' + keyword);
+    if (keyword) {
       var tags = self.tagList.tags();
       var tag = tags.find(function(element) {
         return element.constructedKeyword() == keyword;
       });
+      
+      console.log("Tag is ", ko.toJS(tag));
       
       if (tag) {
         if (self.filterBy() != null) {
@@ -757,22 +816,38 @@ var ViewModel = function() {
         tag.selected(true);
         tag.tagGroup.expanded(true);          
       }
-      if (!(self.showPage() || self.loadPage())) {
-        self.loadPage(1);
-      }
     }
+    else {
+      if (self.filterBy() != null) {
+        self.filterBy().selected(false);
+      }
+      self.filterBy(null);
+    }
+    self.resetRoutes();
   });
+  
+  this.filterKeyword.subscribe(function(oldKeyword) {
+    /* Want to reset the page to 1 if the filter is changed */
+    /* But not if this is the first time it's set */
+    self.loadPage(1);
+    if (oldKeyword != null) {
+      self.loadPage(1);
+    }
+  }, null, "beforeChange");
+
 
   /* when the loadPage changes - a new page of thumbnails to be loaded */
   this.loadPage.subscribe(function(value) {
-    if (self.dataLoaded()) {
-      self.appStatus('loading-thumbnails');
-      self.loadingPhotos().forEach(function(photo) {
-        /* manually subscribe to force load so we only load the thumbnails needed*/
-        photo.thumbnail.subscribe(function(value) {
-        });
+    console.log("Page changed to " + value);
+    self.appStatus('loading-thumbnails');
+    self.loadingPhotos().forEach(function(photo) {
+      /* manually subscribe to force load so we only load the thumbnails needed*/
+      photo.thumbnail.subscribe(function(value) {
       });
-    }
+    });
+    self.resetRoutes();
+    $('html, body').scrollTop(0);
+
   });
   
 //  this.loadPage.extend({ notify: 'always' });
@@ -782,17 +857,26 @@ var ViewModel = function() {
     if (filename && self.selectedPhoto()) {
       self.selectedPhoto().getData();
     }
+    console.log('Filename changed to ' + filename);
     self.resetRoutes();
   });
   
   this.resetRoutes = function() {
-    console.log("resetting routes");
-    routes.setLocation(self.fullHash());
+    var newLocation = self.fullHash();
+    console.log("resetting routes? " + self.fullHash());
+    if (newLocation != '#') {
+      console.log("YES RESETTING ROUTES to " + self.fullHash());
+      routes.setLocation(newLocation);
+    }
+    else {
+      console.log("no location, don't reset routes.");
+    }
   };
   
   // Client-side routes
   var routes = Sammy(function() {
 
+  
     /* #:keyword/:page/:file */
     this.get(/\#([^\/]*)\/?([^\/]*)\/?([^\/]*)/, function() {
       var keyword = this.params.splat[0];
@@ -801,7 +885,7 @@ var ViewModel = function() {
       
       if (!page) page = 1;
       
-      console.log(keyword, page, file);
+      console.log("New Route",keyword, page, file);
       
       if (self.dataLoaded()) {
         self.filterKeyword(keyword);
@@ -811,6 +895,13 @@ var ViewModel = function() {
              
     });
     
+    this.get('', function() {
+      if (self.dataLoaded()) {
+        self.filterKeyword('');
+        self.loadPage(1);
+        self.selectedFileName('');
+      }
+    });
 
     
   }).run();
