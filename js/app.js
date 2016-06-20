@@ -92,8 +92,10 @@ var Photo = function(data, tagList) {
   
   /* Estimate the number of lines needed to view all of the content */
   this.descriptionLines = ko.computed(function() {
-    
-    return parseInt((self.Description.length / 60) * 3);
+    var description = self.editData().Description;
+    if (description) {
+      return Math.floor(parseInt(description().length / 60) * 3);
+    }
   });
   
   
@@ -421,6 +423,10 @@ var ViewModel = function() {
     return self.tagList.groups();
   });
   
+  this.filterBy.subscribe(function(value) {
+    console.log('filterBy changed to ' + value);
+  });
+  
   this.filteredPhotos = function() {    
     if (self.filterBy() == null) return self.photoList();
     else {
@@ -735,33 +741,35 @@ var ViewModel = function() {
   });
   
   this.hash = ko.computed(function() {
+    console.log('Computing hash for filter ' + ko.toJS(self.filterBy()));
     if (self.filterBy()) {
       return self.filterBy().hash();
     }
     else return '#';
   });
   
-  this.pageHash = function() {
+  this.pageHash = ko.computed(function() {
     console.log("Making hash, on page: " + self.onPage());
     if (self.onPage() > 1) {
       return self.hash() + '/' + self.onPage();
     }
     else return self.hash();
-  }
+  });
 
   this.photoHash = function(fileName) {
     if (fileName) {
-      return self.pageHash() + '/' + safeHash(fileName);
+      return self.hash() + '/' + self.onPage() + '/' + safeHash(fileName);
     }
     else return self.pageHash();
   };
   
   this.fullHash = function() {
     if (self.selectedFileName()) {
-      return self.pageHash() + '/' + safeHash(self.selectedFileName());
+      console.log("Hash is " + self.hash() + '/' + self.onPage() + '/' + safeHash(self.selectedFileName()));
+      return self.hash() + '/' + self.onPage() + '/' + safeHash(self.selectedFileName());
     }
     else return self.pageHash();
-  }
+  };
   
   this.previousHash = ko.computed(function() {
     if (self.showPage() > 1) {
@@ -829,7 +837,6 @@ var ViewModel = function() {
   this.filterKeyword.subscribe(function(oldKeyword) {
     /* Want to reset the page to 1 if the filter is changed */
     /* But not if this is the first time it's set */
-    self.loadPage(1);
     if (oldKeyword != null) {
       self.loadPage(1);
     }
@@ -885,13 +892,15 @@ var ViewModel = function() {
       
       if (!page) page = 1;
       
-      console.log("New Route",keyword, page, file);
-      
+      console.log("Running route ",keyword, page, file);
+
       if (self.dataLoaded()) {
+        console.log("Loading new values");
         self.filterKeyword(keyword);
         self.loadPage(page);
         self.selectedFileName(file);
       }
+      else console.log("data not loaded");
              
     });
     
