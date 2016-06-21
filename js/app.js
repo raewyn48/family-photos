@@ -846,6 +846,10 @@ var ViewModel = function() {
         tag.selected(true);
         tag.tagGroup.expanded(true);          
       }
+      else {
+        console.log("Reset filter keyword");
+        self.filterKeyword('');
+      }
     }
     else {
       if (self.filterBy() != null) {
@@ -893,13 +897,14 @@ var ViewModel = function() {
   this.resetRoutes = function() {
     var newLocation = self.fullHash();
     console.log("resetting routes? " + self.fullHash());
-    if (newLocation != '#') {
+    if (newLocation == '#' && !routes.getLocation()) {
+      console.log("no location change, don't reset routes.");
+    }
+    else {
       console.log("YES RESETTING ROUTES to " + self.fullHash());
       routes.setLocation(newLocation);
     }
-    else {
-      console.log("no location, don't reset routes.");
-    }
+    
   };
   
   // Client-side routes
