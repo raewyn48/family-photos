@@ -225,7 +225,7 @@ var Photo = function(data, tagList) {
   
 };
 
-var Tag = function(keyword) {
+var Tag = function(keyword, initialCount) {
   var self = this;
   
   this.selected = ko.observable(false);
@@ -242,7 +242,7 @@ var Tag = function(keyword) {
   
   // this.tagGroup is set by TagGroup when tag added to group //
   
-  this.count = ko.observable(1);
+  this.count = ko.observable(initialCount);
   
   this.keywordWithCount = ko.computed(function() {
     return self.keyword() + ' (' + self.count() + ')';
@@ -309,6 +309,7 @@ var TagGroup = function(tag) {
 var TagList = function() {
   var self = this;
   this.tags = ko.observableArray([]);
+  
   this.groups = ko.observableArray([]);
   
   this.addTag = function(keyword) {
@@ -329,7 +330,7 @@ var TagList = function() {
       return existing;
     }
     else {
-      newTag = new Tag(keyword);
+      newTag = new Tag(keyword,1);
       self.tags.push(newTag);
       
       if (existingGroup = ko.utils.arrayFirst(self.groups(), function(item) {
@@ -394,6 +395,17 @@ var ViewModel = function() {
 
   
   this.tagList = new TagList(); // List of all tags for all photos
+
+  /* Load keywords */
+  /* But keywords really need to be loaded with the photos anyway or the filtering information isn't available */
+  // $.getJSON("/photo_api/slim/photos/keywords", function(data) {
+    // if (data) {
+      // data.forEach(function(keyword) {
+          // self.tagList.addTag(keyword,0);
+      // });
+      // //console.log(self.tagList);
+    // }
+  // });
 	
   /* Load all photo data */
   $.getJSON("/photo_api/slim/photos?min=yes", function(data) {
@@ -494,14 +506,21 @@ var ViewModel = function() {
   
   /* return true if all thumbnails for loadPage have been loaded */
   this.thumbnailsLoaded = ko.computed(function() {
+    console.log('Computing thumbnails loaded');
     var thisPage = self.loadingPhotos();
+    console.log(thisPage.length + ' need to be loaded');
     if (!thisPage.length) return false;
     var allLoaded = thisPage.every(function(photo) {
       return photo.thumbnailLoaded();
     });
-    if (allLoaded) self.appStatus('');
     return allLoaded;
-    
+  });
+  
+  this.thumbnailsLoaded.extend({ notify: 'always' });
+  
+  this.thumbnailsLoaded.subscribe(function(loaded) {
+    console.log('Thumbnails loaded is ' + loaded);
+    if (loaded) self.appStatus('');
   });
      
   this.selectedPhotoIndex = ko.computed(function() {
@@ -825,6 +844,10 @@ var ViewModel = function() {
     return true;
   };
   
+  this.resetFilter = function() {
+    self.filterKeyword('');
+  };
+  
   // Routing subscriptions
   
   /* What to do when filterKeyword is changed */
@@ -857,15 +880,17 @@ var ViewModel = function() {
       }
       self.filterBy(null);
     }
+    if (self.oldKeyword != null) {
+    /* Want to reset the page to 1 if the filter is changed */
+    /* But not if this is the first time it's set */
+      console.log("new filter, load page 1");
+      self.loadPage(1);
+    }
     self.resetRoutes();
   });
   
   this.filterKeyword.subscribe(function(oldKeyword) {
-    /* Want to reset the page to 1 if the filter is changed */
-    /* But not if this is the first time it's set */
-    if (oldKeyword != null) {
-      self.loadPage(1);
-    }
+    self.oldKeyword = oldKeyword;
   }, null, "beforeChange");
 
 

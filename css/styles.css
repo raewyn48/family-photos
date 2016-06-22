@@ -136,6 +136,16 @@ li.tag.selected {
     font-weight: bold;
 }
 
+li.tag.selected a.reset {
+  display: inline;
+  text-decoration: none;
+}
+
+
+li.tag a.reset {
+  display: none;
+}
+
 li.tag a {
     text-decoration: none;
 }

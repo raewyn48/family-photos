@@ -23,7 +23,7 @@
       <li class="group" data-bind="text: groupDisplay, css: {expanded: expanded}, click: toggleExpand"></li>
       <div data-bind="visible: expanded">
         <ul data-bind="foreach: tags" class="tags">
-          <li class="tag" data-bind="visible: count() > 0, css: {selected: selected}"><a href="#" data-bind="text: keywordWithCount, attr: {href: hash}" class="keyword"></a></li>
+          <li class="tag" data-bind="visible: count() > 0, css: {selected: selected}"><a href="#" data-bind="text: keywordWithCount, attr: {href: hash}" class="keyword"></a>&nbsp;<a data-bind="click: $parent.resetFilter" href="#" class="reset w3-text-dark-grey w3-hover-text-red">x</a></li>
         </ul>
       </div>
     </ul>
