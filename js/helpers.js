@@ -16,3 +16,19 @@ function safeHash(string) {
   }
   return safeStr;
 }
+
+var isDebug = false;
+
+if(isDebug && window.console && console.log && console.warn && console.error){
+    window.debug = {
+        'log': window.console.log.bind(console),
+        'warn': window.console.warn.bind(console),
+        'error': window.console.error.bind(console)
+    };
+}else{
+    window.debug = {
+        'log': function(){},
+        'warn': function(){},
+        'error': function(){}
+    };
+}

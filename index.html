@@ -34,7 +34,7 @@
   <!-- Grid of thumbnails -->
   <div class="thumbnails w3-container">
     <!-- ko foreach: showPhotos -->
-    <div class="thumbnail-wrapper">
+    <div data-bind="visible: filterActive($parent.filterKeyword())" class="thumbnail-wrapper">
         <div data-bind="css: orientation" class="thumbnail w3-hover-shadow w3-border w3-padding-small w3-margin-top w3-hover-opacity">
           <a data-bind="attr: {href: $parent.photoHash(FileName)}"><img data-bind="attr: {src: thumbnail }"></a>
           <div data-bind="text: FileName" class="w3-small w3-center"></div>
